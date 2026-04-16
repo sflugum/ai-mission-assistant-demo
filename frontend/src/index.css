@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Small defaults to make the demo look decent with minimal markup. */
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
