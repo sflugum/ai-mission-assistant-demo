@@ -2,6 +2,8 @@ import React, { useState } from 'react'
 
 let requestCounter = 0
 let latestRequestId = 0
+const API_BASE_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '')
+const ANALYZE_URL = API_BASE_URL ? `${API_BASE_URL}/analyze` : '/analyze'
 
 function Section({ title, items, loading }) {
   return (
@@ -58,7 +60,7 @@ export default function App() {
     setLoading(true)
 
     try {
-      const res = await fetch('/analyze', {
+      const res = await fetch(ANALYZE_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ input })
