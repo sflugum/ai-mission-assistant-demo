@@ -44,16 +44,8 @@ function validateAIResponse(data) {
   return true
 }
 
-async function generateAnalysisWithGemini(input) {
-  const apiKey = process.env.GOOGLE_API_KEY
-  if (!apiKey) {
-    throw new Error(
-      'Missing GOOGLE_API_KEY. Copy backend/.env.example to backend/.env and set it.'
-    )
-  }
-
-  const model = process.env.GOOGLE_MODEL || 'gemini-2.5-flash'
-  const prompt = `You are a senior analyst.
+function buildPrimaryPrompt(input) {
+  return `You are a senior analyst.
 
 User input:
 "${input}"
@@ -72,12 +64,36 @@ No markdown.
 No explanation.
 Only JSON.
 Any deviation from schema is invalid.`
+}
 
+function buildRepairPrompt(input, previousRawResponse) {
+  return `Your previous response was invalid.
+
+User input:
+"${input}"
+
+Previous invalid response:
+${previousRawResponse ?? ''}
+
+You MUST output ONLY valid JSON with exactly these keys:
+actionPlan, risks, tools
+
+Rules:
+- All values must be arrays of strings
+- No markdown
+- No explanations
+- No extra keys
+- No "plan" field
+
+Return corrected response only.`
+}
+
+async function callGemini(apiKey, model, prompt) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
     model
   )}:generateContent?key=${encodeURIComponent(apiKey)}`
 
-  const response = await fetch(url, {
+  const apiResponse = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -93,15 +109,18 @@ Any deviation from schema is invalid.`
     })
   })
 
-  const data = await response.json().catch(() => ({}))
-  if (!response.ok) {
+  const data = await apiResponse.json().catch(() => ({}))
+  if (!apiResponse.ok) {
     const msg =
       data?.error?.message ||
-      `Google API request failed with status ${response.status}`
+      `Google API request failed with status ${apiResponse.status}`
     throw new Error(msg)
   }
 
-  const rawResponse = data?.candidates?.[0]?.content?.parts?.[0]?.text
+  return data?.candidates?.[0]?.content?.parts?.[0]?.text
+}
+
+function parseAndValidateRaw(rawResponse) {
   console.log('[AI RESPONSE RAW]', rawResponse)
   const jsonText = extractJsonObject(rawResponse)
   if (!jsonText) {
@@ -123,6 +142,47 @@ Any deviation from schema is invalid.`
   return normalizedResponse
 }
 
+async function generateAnalysisWithGemini(input) {
+  const apiKey = process.env.GOOGLE_API_KEY
+  if (!apiKey) {
+    throw new Error(
+      'Missing GOOGLE_API_KEY. Copy backend/.env.example to backend/.env and set it.'
+    )
+  }
+
+  const model = process.env.GOOGLE_MODEL || 'gemini-2.5-flash'
+  const primaryPrompt = buildPrimaryPrompt(input)
+
+  const firstRawResponse = await callGemini(apiKey, model, primaryPrompt)
+  try {
+    return parseAndValidateRaw(firstRawResponse)
+  } catch (firstAttemptError) {
+    console.warn(
+      '[AI VALIDATION FAILED] First attempt failed:',
+      firstAttemptError?.message || firstAttemptError
+    )
+    console.warn('[AI VALIDATION FAILED] Retrying once...')
+
+    const repairPrompt = buildRepairPrompt(input, firstRawResponse)
+    const retryRawResponse = await callGemini(apiKey, model, repairPrompt)
+    console.warn('[AI RETRY RESULT]', retryRawResponse)
+
+    try {
+      const repaired = parseAndValidateRaw(retryRawResponse)
+      console.warn('[AI RETRY RESULT] Success')
+      return repaired
+    } catch (retryError) {
+      console.warn(
+        '[AI RETRY RESULT] Failed:',
+        retryError?.message || retryError
+      )
+      const finalError = new Error('AI response failed validation after retry')
+      finalError.code = 'AI_VALIDATION_RETRY_FAILED'
+      throw finalError
+    }
+  }
+}
+
 app.post('/analyze', async (req, res) => {
   try {
     const input = req?.body?.input
@@ -134,6 +194,15 @@ app.post('/analyze', async (req, res) => {
     validateAIResponse(analysis)
     return res.json(analysis)
   } catch (err) {
+    if (err?.code === 'AI_VALIDATION_RETRY_FAILED') {
+      return res.status(500).json({
+        error: 'AI response failed validation after retry',
+        actionPlan: [],
+        risks: [],
+        tools: []
+      })
+    }
+
     // Frontend treats non-2xx as errors and displays res.text().
     const message = err?.message || 'Failed to analyze input.'
     return res.status(500).send(message)
