@@ -20,11 +20,28 @@ function extractJsonObject(text) {
   return text.slice(start, end + 1)
 }
 
-function asStringArray(maybeArray) {
-  if (!Array.isArray(maybeArray)) return []
-  return maybeArray
-    .map((v) => (typeof v === 'string' ? v : null))
-    .filter(Boolean)
+function validateAIResponse(data) {
+  if (!data) throw new Error('Empty AI response')
+
+  const requiredFields = ['actionPlan', 'risks', 'tools']
+  for (const field of requiredFields) {
+    if (!data[field]) {
+      throw new Error(`Invalid AI response: missing ${field}`)
+    }
+
+    if (!Array.isArray(data[field])) {
+      throw new Error(`Invalid AI response: ${field} must be an array`)
+    }
+  }
+
+  const allowedFields = new Set(requiredFields)
+  for (const key of Object.keys(data)) {
+    if (!allowedFields.has(key)) {
+      throw new Error(`Invalid AI response: unexpected key ${key}`)
+    }
+  }
+
+  return true
 }
 
 async function generateAnalysisWithGemini(input) {
@@ -43,12 +60,18 @@ User input:
 
 Return ONLY valid JSON:
 {
-  "plan": [],
+  "actionPlan": [],
   "risks": [],
   "tools": []
 }
 
-No markdown. No explanation. Only JSON.`
+You MUST output valid JSON with keys exactly: actionPlan, risks, tools.
+Do not include any additional keys.
+Do not use 'plan'.
+No markdown.
+No explanation.
+Only JSON.
+Any deviation from schema is invalid.`
 
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
     model
@@ -78,18 +101,26 @@ No markdown. No explanation. Only JSON.`
     throw new Error(msg)
   }
 
-  const modelText = data?.candidates?.[0]?.content?.parts?.[0]?.text
-  const jsonText = extractJsonObject(modelText)
+  const rawResponse = data?.candidates?.[0]?.content?.parts?.[0]?.text
+  console.log('[AI RESPONSE RAW]', rawResponse)
+  const jsonText = extractJsonObject(rawResponse)
   if (!jsonText) {
     throw new Error('AI output did not contain a valid JSON object.')
   }
 
   const parsed = JSON.parse(jsonText)
-  return {
-    plan: asStringArray(parsed?.plan),
-    risks: asStringArray(parsed?.risks),
-    tools: asStringArray(parsed?.tools)
+  console.log('[AI RESPONSE PARSED]', parsed)
+  if ('plan' in parsed) {
+    console.error("[CRITICAL] Legacy 'plan' field detected — migration incomplete")
   }
+
+  const normalizedResponse = {
+    actionPlan: parsed?.actionPlan,
+    risks: parsed?.risks,
+    tools: parsed?.tools
+  }
+  validateAIResponse(normalizedResponse)
+  return normalizedResponse
 }
 
 app.post('/analyze', async (req, res) => {
@@ -100,6 +131,7 @@ app.post('/analyze', async (req, res) => {
     }
 
     const analysis = await generateAnalysisWithGemini(input.trim())
+    validateAIResponse(analysis)
     return res.json(analysis)
   } catch (err) {
     // Frontend treats non-2xx as errors and displays res.text().

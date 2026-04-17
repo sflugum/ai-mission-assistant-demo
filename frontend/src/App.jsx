@@ -35,15 +35,11 @@ export default function App() {
   const canSubmit = input.trim().length > 0 && !loading
 
   function normalizeResponse(data) {
-    const actionPlan = Array.isArray(data?.actionPlan)
-      ? data.actionPlan
-      : Array.isArray(data?.plan)
-        ? data.plan
-        : null
-    const risks = Array.isArray(data?.risks) ? data.risks : null
-    const tools = Array.isArray(data?.tools) ? data.tools : null
-
-    return { actionPlan, risks, tools }
+    return {
+      actionPlan: data.actionPlan,
+      risks: data.risks,
+      tools: data.tools
+    }
   }
 
   async function onSubmit(e) {
@@ -74,6 +70,10 @@ export default function App() {
       }
 
       const data = await res.json()
+      if ('plan' in data) {
+        console.warn("[DEPRECATION] backend still sending legacy 'plan' field")
+      }
+
       const normalized = normalizeResponse(data)
 
       if (requestId !== latestRequestId) {
@@ -86,12 +86,12 @@ export default function App() {
       }
 
       const isFullResponse =
-        normalized.actionPlan !== null &&
-        normalized.risks !== null &&
-        normalized.tools !== null
+        Array.isArray(normalized.actionPlan) &&
+        Array.isArray(normalized.risks) &&
+        Array.isArray(normalized.tools)
 
       if (!isFullResponse) {
-        throw new Error('Incomplete AI response. Please try again.')
+        throw new Error('Invalid API response: missing actionPlan')
       }
 
       console.debug('[analyze] response applied', {

@@ -11,7 +11,7 @@ Request body:
 
 Success response (strict JSON):
 ```json
-{ "plan": ["..."], "risks": ["..."], "tools": ["..."] }
+{ "actionPlan": ["..."], "risks": ["..."], "tools": ["..."] }
 ```
 
 ## Environment variables
