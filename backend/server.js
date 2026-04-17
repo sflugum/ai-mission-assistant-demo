@@ -5,9 +5,18 @@ import cors from 'cors'
 // Nodemon does not reload .env on change — restart the server after editing backend/.env.
 
 const app = express()
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://ai-mission-assistant-demo.vercel.app'
+]
+
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:5173'
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true)
+      if (allowedOrigins.includes(origin)) return callback(null, true)
+      return callback(new Error('Not allowed by CORS'))
+    }
   })
 )
 app.use(express.json({ limit: '1mb' }))
