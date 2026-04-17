@@ -1,11 +1,16 @@
-import React, { useMemo, useState } from 'react'
+import React, { useState } from 'react'
 
-function Section({ title, items }) {
+let requestCounter = 0
+let latestRequestId = 0
+
+function Section({ title, items, loading }) {
   return (
     <section className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
       <h2 className="text-base font-semibold text-slate-100">{title}</h2>
       <div className="mt-3 space-y-2">
-        {(items ?? []).length === 0 ? (
+        {loading && (items ?? []).length === 0 ? (
+          <p className="text-sm text-slate-400">Generating...</p>
+        ) : (items ?? []).length === 0 ? (
           <p className="text-sm text-slate-400">No results yet.</p>
         ) : (
           (items ?? []).map((it, idx) => (
@@ -25,16 +30,37 @@ export default function App() {
   )
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [result, setResult] = useState({ plan: [], risks: [], tools: [] })
+  const [result, setResult] = useState({ actionPlan: [], risks: [], tools: [] })
 
-  const canSubmit = useMemo(() => {
-    return input.trim().length > 0 && !loading
-  }, [input, loading])
+  const canSubmit = input.trim().length > 0 && !loading
+
+  function normalizeResponse(data) {
+    const actionPlan = Array.isArray(data?.actionPlan)
+      ? data.actionPlan
+      : Array.isArray(data?.plan)
+        ? data.plan
+        : null
+    const risks = Array.isArray(data?.risks) ? data.risks : null
+    const tools = Array.isArray(data?.tools) ? data.tools : null
+
+    return { actionPlan, risks, tools }
+  }
 
   async function onSubmit(e) {
     e.preventDefault()
+    if (loading) return
+
+    const requestId = ++requestCounter
+    latestRequestId = requestId
+
+    console.debug('[analyze] start', {
+      requestId,
+      startedAt: new Date().toISOString()
+    })
+
     setError('')
     setLoading(true)
+
     try {
       const res = await fetch('/analyze', {
         method: 'POST',
@@ -48,16 +74,46 @@ export default function App() {
       }
 
       const data = await res.json()
-      setResult({
-        plan: Array.isArray(data?.plan) ? data.plan : [],
-        risks: Array.isArray(data?.risks) ? data.risks : [],
-        tools: Array.isArray(data?.tools) ? data.tools : []
+      const normalized = normalizeResponse(data)
+
+      if (requestId !== latestRequestId) {
+        console.debug('[analyze] stale response ignored', {
+          requestId,
+          latestRequestId,
+          arrivedAt: new Date().toISOString()
+        })
+        return
+      }
+
+      const isFullResponse =
+        normalized.actionPlan !== null &&
+        normalized.risks !== null &&
+        normalized.tools !== null
+
+      if (!isFullResponse) {
+        throw new Error('Incomplete AI response. Please try again.')
+      }
+
+      console.debug('[analyze] response applied', {
+        requestId,
+        arrivedAt: new Date().toISOString()
       })
+
+      setResult(normalized)
     } catch (err) {
+      if (requestId !== latestRequestId) {
+        return
+      }
       setError(err?.message || 'Something went wrong.')
-      setResult({ plan: [], risks: [], tools: [] })
     } finally {
-      setLoading(false)
+      if (requestId === latestRequestId) {
+        console.debug('[analyze] finish', {
+          requestId,
+          finishedAt: new Date().toISOString(),
+          loading: false
+        })
+        setLoading(false)
+      }
     }
   }
 
@@ -95,9 +151,9 @@ export default function App() {
         </form>
 
         <div className="mt-8 grid gap-4 md:grid-cols-3">
-          <Section title="Action Plan" items={result.plan} />
-          <Section title="Risks" items={result.risks} />
-          <Section title="Tools" items={result.tools} />
+          <Section title="Action Plan" items={result.actionPlan} loading={loading} />
+          <Section title="Risks" items={result.risks} loading={loading} />
+          <Section title="Tools" items={result.tools} loading={loading} />
         </div>
       </main>
     </div>

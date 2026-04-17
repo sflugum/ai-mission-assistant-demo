@@ -2,6 +2,8 @@ import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
 
+// Nodemon does not reload .env on change — restart the server after editing backend/.env.
+
 const app = express()
 app.use(
   cors({
@@ -33,7 +35,7 @@ async function generateAnalysisWithGemini(input) {
     )
   }
 
-  const model = process.env.GOOGLE_MODEL || 'gemini-1.5-flash'
+  const model = process.env.GOOGLE_MODEL || 'gemini-2.5-flash'
   const prompt = `You are a senior analyst.
 
 User input:
