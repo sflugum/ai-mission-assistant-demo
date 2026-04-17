@@ -1,247 +1,108 @@
-# AI Mission Assistant Demo
+# AI Mission Assistant
 
-AI-first orchestration system that transforms ambiguous natural language into structured, validated mission outputs using controlled LLM execution.
+AI-first agentic orchestration system that converts ambiguous natural language into structured, schema-validated JSON using LLM-driven workflow design, prompt decomposition, and validation layers.
 
-🔗 **Live Demo:** https://ai-mission-assistant-demo.vercel.app
-🔗 **API Endpoint:** https://ai-mission-assistant-demo.onrender.com/
+Built as a rapid AI-first software prototype exploring how far **LLM-driven development can replace traditional deterministic application logic**.
 
----
-
-## Overview
-
-This system demonstrates how AI-first development can rapidly produce deployable tools by treating LLMs as a probabilistic execution layer and enforcing deterministic behavior through a backend control boundary.
-
-It converts unstructured inputs into strict JSON outputs suitable for downstream systems, analysis pipelines, or decision-support workflows.
+Live Demo: https://ai-mission-assistant-demo.vercel.app
+Backend: https://ai-mission-assistant-demo.onrender.com
 
 ---
 
-## Why This Project Exists
+## 🚀 Problem → Approach
 
-Modern software development is shifting from manual implementation to **AI-directed system design**.
+Modern natural language input is inherently ambiguous and non-deterministic, making it unreliable for downstream system use without structure.
 
-This project explores how far that can be pushed under IRAD-style constraints:
+This system treats that ambiguity as a first-class constraint and resolves it through:
+- prompt decomposition
+- schema-constrained generation
+- validation + correction loops
+- structured orchestration design
 
-- minimal upfront specification  
-- rapid iteration cycles  
-- AI as the primary implementation engine  
-- human effort focused on architecture and correctness  
-
-The result is a production-shaped prototype built for speed, reliability, and structured outputs—not code craftsmanship.
-
----
-
-## Key Capabilities
-
-- Translates ambiguous user intent into structured machine-readable data  
-- Enforces strict JSON contracts over non-deterministic model output  
-- Uses a backend orchestration layer to control and validate AI behavior  
-- Demonstrates rapid full-stack delivery using AI-first workflows  
-- Maintains consistent outputs despite model variability  
+Goal: turn unstructured intent into **reliable machine-executable output**.
 
 ---
 
-## Stack
+## 🧠 System Architecture (AI Orchestration Model)
 
-- Frontend: React (Vite) + Tailwind CSS  
-- Backend: Node.js + Express  
-- AI: Google Generative Language API (Gemini)
+User Input  
+→ Intent Interpretation (Prompt Decomposition Layer)  
+→ LLM Execution (Gemini 2.5 Flash)  
+→ Structured JSON Generation  
+→ Schema Validation Layer  
+→ Correction / Re-prompt Loop (if invalid)  
+→ Final Output
 
----
+### Key Design Principle:
+The LLM is treated as a **probabilistic execution engine**, not a deterministic logic layer.
 
-## Architecture Diagram
-
-### High-level flow
-
-```
-┌────────────────────────────────────┐
-│ Operator Input │
-│ Natural Language Request │
-└──────────────────┬─────────────────┘
-│
-▼
-┌────────────────────────────────────┐
-│ Frontend (Vercel) │
-│ React Operator Interface │
-└──────────────────┬─────────────────┘
-│ REST (/analyze)
-▼
-┌────────────────────────────────────┐
-│ Backend (Render) │
-│ Node.js Orchestration Layer │
-│ │
-│ • Prompt Construction │
-│ • Schema Enforcement │
-│ • Response Validation │
-│ • Failure Handling │
-└──────────────────┬─────────────────┘
-│
-▼
-┌────────────────────────────────────┐
-│ Gemini LLM │
-│ Probabilistic Execution Layer │
-└──────────────────┬─────────────────┘
-│
-▼
-┌────────────────────────────────────┐
-│ Structured JSON Output │
-│ { intent, confidence, data } │
-└────────────────────────────────────┘
-```
+The backend functions as an **AI orchestration boundary** responsible for:
+- structuring ambiguous inputs into constrained prompts
+- enforcing schema compliance on outputs
+- detecting invalid or partial model responses
+- triggering re-generation or correction flows when needed
 
 ---
 
-## AI-First Development Model
+## ⚙️ Stack (AI-First System Design)
 
-This system uses an AI-first workflow where LLMs serve as the primary implementation engine.
-
-### Human effort is concentrated on:
-
-- system decomposition  
-- architecture decisions  
-- prompt design  
-- failure mode analysis  
-
-### Development pattern:
-
-- Generate → Test → Evaluate → Refactor
-
-Code is treated as an iterative artifact optimized for delivery speed and correctness of system behavior.
+- Frontend: React (Vite), Tailwind CSS
+- Backend: Node.js, Express (Orchestration Layer)
+- AI Model: Google Gemini 2.5 Flash
+- Pattern: LLM-as-core-logic with validation guardrails
+- Deployment: [Vercel / Render]
 
 ---
 
-## System Characteristics
+## 🔑 Key Engineering Decisions (What Was Actually Built)
 
-This project demonstrates patterns used in agentic and AI-accelerated systems:
-
-- Translating ambiguous inputs into structured system behavior  
-- Designing multi-stage AI orchestration pipelines  
-- Enforcing deterministic outputs from probabilistic models  
-- Treating LLMs as unreliable execution environments requiring defensive design  
-- Building deployable systems under rapid iteration constraints  
-
-### Key structural properties:
-
-- Strict JSON contract enforcement (`docs/prd.md`)  
-- Backend-controlled AI behavior boundary  
-- Isolation of external model variability  
-- Deterministic output shaping layer  
+- **Prompt-as-architecture design:** system behavior defined through structured prompt decomposition rather than hardcoded business logic
+- **Schema-constrained generation:** ensures LLM outputs are structurally valid for downstream consumption
+- **Validation + correction loop:** treats model output as untrusted input requiring enforcement and recovery
+- **Orchestration boundary separation:** isolates AI reasoning layer from UI and transport logic
+- **Iterative prompt refinement loop:** generate → test → evaluate failure modes → refine prompts/schemas
 
 ---
 
-## Deployment Architecture
+## ⚖️ Failure Modes & Non-Deterministic Behavior Handling
 
-### Frontend (Vercel)
-- React (Vite)
-- Static deployment
-- Operator interface layer
+This system explicitly accounts for LLM unpredictability:
 
-### Backend (Render)
-- Node.js + Express
-- Stateless orchestration service
-- AI interaction boundary layer
+- **Schema drift:** mitigated via strict validation layer and rejection logic
+- **Ambiguity collapse:** resolved through prompt decomposition before model execution
+- **Hallucinated or partial outputs:** handled via validation failure detection and re-prompting
+- **Inconsistent formatting:** normalized through structured output enforcement
+- **Model dependency risk:** external API constraints treated as part of system design
 
----
-
-## Production Configuration
-
-### Backend
-
-```env
-GOOGLE_API_KEY=your_production_api_key
-GOOGLE_MODEL=gemini-2.5-flash
-CORS_ORIGIN=https://your-frontend-domain.com
-PORT=10000 # or platform-assigned PORT
-```
+Core principle:  
+**All LLM outputs are treated as untrusted inputs.**
 
 ---
 
-## What This System Demonstrates
-- Structured transformation of ambiguous inputs into machine-readable outputs
-- AI orchestration via controlled backend service layer
-- Separation of UI, orchestration, and AI dependencies
-- Handling of unreliable LLM outputs through validation and normalization
-- Rapid full-stack prototype delivery under constrained timelines
-- System design judgment in AI-generated environments
+## 🧪 Agentic / AI-First Capabilities Demonstrated
+
+- Natural language → structured system instruction transformation
+- Prompt decomposition into executable sub-intents
+- AI-driven workflow orchestration pattern (non-rule-based logic)
+- Validation-driven correction loops for unreliable outputs
+- Rapid iteration of system behavior through prompt and schema evolution
 
 ---
 
-## Quick Start (Local)
+## 🔁 Development Model (IRAD-Style Iteration)
 
-### Backend
-```Bash
-cd backend
-cp .env.example .env
-npm install
-npm run dev
-```
+Built using an AI-first iterative loop:
 
-### Frontend
-```Bash
-cd frontend
-npm install
-npm run dev
-```
+Generate → Test → Observe failure modes → Adjust prompts/schemas → Re-run
 
-Frontend expects backend at:
-```
-http://localhost:3001/analyze
-```
----
-
-## Production Deployment Model
-
-This system is deployed as a decoupled architecture:
-
-### Frontend
-- Vercel
-- Static UI layer
-
-### Backend
-- Render
-- Stateless orchestration API
+No reliance on traditional linear feature development; system behavior evolves through continuous prompt and constraint tuning.
 
 ---
 
-## API Contract
+## 📌 What This Demonstrates 
 
-### POST /analyze
-
-Request:
-```JSON
-
-{
-  "input": "user natural language request"
-}
-```
-
-Response:
-```json
-
-{
-  "intent": "classified intent",
-  "confidence": 0.0,
-  "data": {}
-}
-```
-
----
-
-## Reliability & Fault Tolerance
-- Backend isolates LLM dependency as a controlled failure domain
-- Strict schema validation prevents malformed outputs from propagating
-- Input normalization before prompt execution
-- Graceful degradation under API instability or rate limits
-- Defensive parsing for unpredictable model behavior
-
----
-
-## Summary
-
-AI Mission Assistant is a production-shaped prototype demonstrating:
-
-- AI-first software development workflows
-- IRAD-style rapid system iteration
-- Structured LLM orchestration with strict contracts
-- Mission-oriented backend design
-- Full-stack deployable architecture
-- Controlled handling of probabilistic AI systems
+- AI-first software design (LLM as primary development medium)
+- Agentic system thinking (decomposition + orchestration + correction loops)
+- Strong judgment around non-deterministic system behavior
+- Rapid prototyping under ambiguity and undefined requirements
+- Production-aware handling of probabilistic execution systems
