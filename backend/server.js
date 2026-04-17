@@ -193,6 +193,7 @@ async function generateAnalysisWithGemini(input) {
 }
 
 app.post('/analyze', async (req, res) => {
+  console.log("HIT /analyze")
   try {
     const input = req?.body?.input
     if (typeof input !== 'string' || input.trim().length === 0) {
@@ -214,7 +215,7 @@ app.post('/analyze', async (req, res) => {
 
     // Frontend treats non-2xx as errors and displays res.text().
     const message = err?.message || 'Failed to analyze input.'
-    return res.status(500).send(message)
+    return res.status(500).json({ error: message })
   }
 })
 
