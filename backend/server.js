@@ -119,6 +119,7 @@ async function callGemini(apiKey, model, prompt) {
   })
 
   const data = await apiResponse.json().catch(() => ({}))
+
   if (!apiResponse.ok) {
     const msg =
       data?.error?.message ||
@@ -126,7 +127,14 @@ async function callGemini(apiKey, model, prompt) {
     throw new Error(msg)
   }
 
-  return data?.candidates?.[0]?.content?.parts?.[0]?.text
+  // patch for undefined failures
+  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text
+
+  if (!text) {
+    throw new Error("Invalid Gemini response: missing output text")
+  }
+
+  return text
 }
 
 function parseAndValidateRaw(rawResponse) {
