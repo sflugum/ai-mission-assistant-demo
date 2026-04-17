@@ -25,7 +25,7 @@ docs/
 - Review output
 - Fix issues via iteration
 
-###Not:
+### Not:
 - Manually writing everything
 
 ## 2.4 First Step
@@ -46,10 +46,10 @@ Read docs/prd.md.
 
 ## 2.5 Build Order (CRITICAL)
 
-###Step 1 — Scaffold
+### Step 1 — Scaffold
 Create frontend (React Vite) and backend (Express) minimal structure.
 
-###Step 2 — Backend
+### Step 2 — Backend
 Create Express server with POST /analyze.
 Input: { input }
 Return JSON response.
@@ -59,15 +59,15 @@ Connect Google AI Studio API in backend.
 Force output format:
 { plan: [], risks: [], tools: [] }
 
-###Step 4 — Frontend
+### Step 4 — Frontend
 Create textarea + submit button.
 Call backend /analyze.
 Display structured response.
 
-##2.6 Core AI Prompt (Backend)
+## 2.6 Core AI Prompt (Backend)
 You are a senior analyst.
 
-###User input:
+### User input:
 "${input}"
 
 Return ONLY valid JSON:
@@ -80,18 +80,19 @@ Return ONLY valid JSON:
 
 No markdown. No explanation. Only JSON.
 
-##2.7 Iteration Strategy
+## 2.7 Iteration Strategy
 
 ### Build → test → fix → repeat
 
 ### Never spend >20 minutes stuck on one issue
 
-###If stuck:
+### If stuck:
 paste error into Cursor
 ask: "fix this and explain briefly"
 
-##2.8 Folder Structure (FINAL)
-ai-mission-assistant/
+## 2.8 Folder Structure (FINAL)
+```
+ai-mission-assistant-demo/
 ├── frontend/
 │   ├── src/
 │   └── App.jsx
@@ -99,8 +100,9 @@ ai-mission-assistant/
 │   └── server.js
 ├── docs/
 │   └── prd.md
+```
 
-##2.9 Build Principle
+## 2.9 Build Principle
 
 ### You are not building everything manually.
 
