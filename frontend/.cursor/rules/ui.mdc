@@ -1,0 +1,15 @@
+---
+globs: ["frontend/**/*.jsx"]
+---
+
+UI rules:
+
+- Use Tailwind only
+- No custom CSS files
+- No design systems
+- No component libraries
+
+Design:
+- Simple layouts
+- No over-styling
+- No animations unless requested

@@ -1,0 +1,20 @@
+---
+alwaysApply: true
+---
+
+STRICT CONSTRAINTS:
+
+- Stack is fixed:
+  - Frontend: React (Vite) + Tailwind
+  - Backend: Node.js + Express
+  - Database: SQLite
+
+- NEVER:
+  - Convert to TypeScript
+  - Introduce frameworks (Next.js, NestJS, etc.)
+  - Add authentication unless asked
+  - Add testing frameworks unless asked
+  - Add Docker unless asked
+
+- If unclear:
+  → choose the simplest possible implementation

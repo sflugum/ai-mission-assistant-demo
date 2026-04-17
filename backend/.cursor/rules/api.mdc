@@ -1,0 +1,13 @@
+---
+globs: ["backend/**/*.js"]
+---
+
+API rules:
+
+- JSON only
+- No validation libraries
+- No middleware unless required
+
+Error handling:
+- Simple status codes
+- No complex error systems
