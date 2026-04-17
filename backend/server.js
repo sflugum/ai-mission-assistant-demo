@@ -211,6 +211,7 @@ app.post('/analyze', async (req, res) => {
 
 const port = Number(process.env.PORT || 3001)
 app.listen(port, () => {
+  console.log('Using Gemini model:', process.env.GOOGLE_MODEL)
   // eslint-disable-next-line no-console
   console.log(`AI Mission Assistant backend listening on http://localhost:${port}`)
 })
