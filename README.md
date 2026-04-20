@@ -1,108 +1,123 @@
-# AI Mission Assistant
+# Reverse Prompt Case Study
+## AI Mission Assistant
 
-AI-first agentic orchestration system that converts ambiguous natural language into structured, schema-validated JSON using LLM-driven workflow design, prompt decomposition, and validation layers.
 
-Built as a rapid AI-first software prototype exploring how far **LLM-driven development can replace traditional deterministic application logic**.
+I saw the **job post**, then hit the keyboard, tapping. **Five hours** later, I had a ***fully functional prototype.***
 
-Live Demo: https://ai-mission-assistant-demo.vercel.app
+The job description became my **client**, and my first move was treating it like one.
+
+I fed the post to *GPT-4* to extract and synthesize requirements, then used those to prompt ~~**Claude Sonnet 4.6*~~ to produce a tight PRD. That doc launched my Cursor project.
+
+From there, I orchestrated an **agentic system** with specialized AI roles:
+
+**GPT-4** → primary consultant: high-level research, strategic logic
+**Google AI** → verification layer: bias reduction, hallucination mitigation
+**Cursor** agent → execution: parallel AI models, ask-before-act mode
+
+**Three** models. ***One*** system. An *AI Mission Assistant*, built between dinner and bedtime.
+
+***Honorable Mention**: Claude Sonnet 4.6 was initially used as a secondary consultant, but replaced by Google AI Overview / AI Mode after PRD completion due to performance constraints. 👾
+
+---
+
+## 📸 Screenshots / Demo
+
+📺 **Live Demo**: https://ai-mission-assistant-demo.vercel.app
 Backend: https://ai-mission-assistant-demo.onrender.com
 
----
-
-## 🚀 Problem → Approach
-
-Modern natural language input is inherently ambiguous and non-deterministic, making it unreliable for downstream system use without structure.
-
-This system treats that ambiguity as a first-class constraint and resolves it through:
-- prompt decomposition
-- schema-constrained generation
-- validation + correction loops
-- structured orchestration design
-
-Goal: turn unstructured intent into **reliable machine-executable output**.
 
 ---
 
-## 🧠 System Architecture (AI Orchestration Model)
+## ⚡ Key Features
 
-User Input  
-→ Intent Interpretation (Prompt Decomposition Layer)  
-→ LLM Execution (Gemini 2.5 Flash)  
-→ Structured JSON Generation  
-→ Schema Validation Layer  
-→ Correction / Re-prompt Loop (if invalid)  
-→ Final Output
-
-### Key Design Principle:
-The LLM is treated as a **probabilistic execution engine**, not a deterministic logic layer.
-
-The backend functions as an **AI orchestration boundary** responsible for:
-- structuring ambiguous inputs into constrained prompts
-- enforcing schema compliance on outputs
-- detecting invalid or partial model responses
-- triggering re-generation or correction flows when needed
+-   **Instant Concept to Motion:** AI Mission Assistant takes your vague ideas and transforms them into structured, actionable plans.
+-   **Structured IRAD Analysis:** Instantly generates three critical pillars using an Internal Research and Development (IRAD) approach: **Action Plan**, **Risks**, and **Tools**.
+-   **Google Studio AI Powered:** Delivers comprehensive, AI-curated output for rapid decision-making using the latest Gemini models.
 
 ---
 
-## ⚙️ Stack (AI-First System Design)
+## 🛠️ Technologies Used
 
-- Frontend: React (Vite), Tailwind CSS
-- Backend: Node.js, Express (Orchestration Layer)
-- AI Model: Google Gemini 2.5 Flash
-- Pattern: LLM-as-core-logic with validation guardrails
-- Deployment: [Vercel / Render]
+### ⚙️ App Stack
 
----
+- **Frontend**: React (Vite), Tailwind CSS
+- **Backend**: Node.js, Express (Orchestration Layer)
+- **AI Model**: Google Gemini 2.5 Flash
+- **Deployment**: Render (backend), Vercel (frontend)
 
-## 🔑 Key Engineering Decisions (What Was Actually Built)
+### 🕸️ Agentic System Architecture
 
-- **Prompt-as-architecture design:** system behavior defined through structured prompt decomposition rather than hardcoded business logic
-- **Schema-constrained generation:** ensures LLM outputs are structurally valid for downstream consumption
-- **Validation + correction loop:** treats model output as untrusted input requiring enforcement and recovery
-- **Orchestration boundary separation:** isolates AI reasoning layer from UI and transport logic
-- **Iterative prompt refinement loop:** generate → test → evaluate failure modes → refine prompts/schemas
+1. **Human-in-the-Loop (HITL)**: Engineering oversight, code approval, and a no-trust verification policy to ensure safety and accuracy.
+2. **GPT-4**: Strategic Consultant for research, architecture structure, and rapid troubleshooting. Context management to distill agent prompts for clearer instructions.
+3. **Cursor Integrated Agent:** Multi-model code generation utilizing "ask-before-act" directives with strict guardrails.
+4. **Google AI Overview / AI Mode**: Secondary consultant for verification, cross-referencing, and hallucination mitigation.
 
 ---
 
-## ⚖️ Failure Modes & Non-Deterministic Behavior Handling
+## 🌵 Issues Encountered / Lessons Learned 💡
 
-This system explicitly accounts for LLM unpredictability:
-
-- **Schema drift:** mitigated via strict validation layer and rejection logic
-- **Ambiguity collapse:** resolved through prompt decomposition before model execution
-- **Hallucinated or partial outputs:** handled via validation failure detection and re-prompting
-- **Inconsistent formatting:** normalized through structured output enforcement
-- **Model dependency risk:** external API constraints treated as part of system design
-
-Core principle:  
-**All LLM outputs are treated as untrusted inputs.**
+- Cursor agent automatically retried API calls when failure occurred. This caused limit issues with free API being used.
+    - Moving forward, I will ensure agent is instructed to pause after failure, report finding, and require my input to proceed.
+- Variable mismatch between 'plan' and 'actionPlan' occurred during API build and affected JSON responses.
+    - Paused to complete full app 'migration' to ensure only 'actionplan' appears on both ends.
+    - Need to ensure agent has strict variable naming protocol to prevent future issues.
+- Needed to switch API AI model due to high traffic
+    - Will ensure the agent is instructed to keep API configuration modular so it can be easily changed  
 
 ---
 
-## 🧪 Agentic / AI-First Capabilities Demonstrated
+## 💻 Running AI Mission Assistant Locally
 
-- Natural language → structured system instruction transformation
-- Prompt decomposition into executable sub-intents
-- AI-driven workflow orchestration pattern (non-rule-based logic)
-- Validation-driven correction loops for unreliable outputs
-- Rapid iteration of system behavior through prompt and schema evolution
+### Prerequisites
+- Node.js: v18.0.0 or higher
+- npm: v9.0.0 or higher
+
+**1. ⌛ Installation**
+Clone the repository and install all dependencies for both frontend and backend.
+
+```Bash
+git clone https://github.com/sflugum/ai-mission-assistant-demo
+cd ai-mission-assistant-demo
+
+# Install all dependencies
+cd backend && npm install
+cd ../frontend && npm install
+```
+
+**2. 🧱 Environment Configuration**
+Navigate to the backend directory and set up your environment variables.
+```Bash
+cd backend
+cp .env.example .env
+```
+
+**3. 🎬 Running the Application**
+Two separate terminal windows are needed to run the full-stack suite
+
+### Terminal 1 (Backend)
+```Bash
+cd backend
+npm start
+```
+*Running on: http://localhost:3001*
+
+### Terminal 2 (Frontend)
+```Bash
+cd frontend
+npm run dev
+```
+*Running on: http://localhost:5173*
 
 ---
 
-## 🔁 Development Model (IRAD-Style Iteration)
+## 📡 API & Proxy Architecture
+The frontend uses a Vite development proxy. 
+All requests made to /analyze on the frontend are automatically routed to the backend at http://localhost:3001/analyze, eliminating CORS issues during development.
 
-Built using an AI-first iterative loop:
 
-Generate → Test → Observe failure modes → Adjust prompts/schemas → Re-run
 
-No reliance on traditional linear feature development; system behavior evolves through continuous prompt and constraint tuning.
 
----
 
-## 📌 What This Demonstrates 
 
-- AI-first software design (LLM as primary development medium)
-- Agentic system thinking (decomposition + orchestration + correction loops)
-- Strong judgment around non-deterministic system behavior
-- Rapid prototyping under ambiguity and undefined requirements
-- Production-aware handling of probabilistic execution systems
+
+
