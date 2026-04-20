@@ -42,7 +42,7 @@ Backend: https://ai-mission-assistant-demo.onrender.com
 ### ⚙️ App Stack
 
 - **Frontend**: React (Vite), Tailwind CSS
-- **Backend**: Node.js, Express (Orchestration Layer)
+- **Backend**: Node.js, Express 
 - **AI Model**: Google Gemini 2.5 Flash
 - **Deployment**: Render (backend), Vercel (frontend)
 
