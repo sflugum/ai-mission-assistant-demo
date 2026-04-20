@@ -10,9 +10,9 @@ I fed the post to *GPT-4* to extract and synthesize requirements, then used thos
 
 From there, I orchestrated an **agentic system** with specialized AI roles:
 
-**GPT-4** → primary consultant: high-level research, strategic logic
-**Google AI** → verification layer: bias reduction, hallucination mitigation
-**Cursor** agent → execution: parallel AI models, ask-before-act mode
+**GPT-4** → primary consultant: high-level research, strategic logic  
+**Google AI** → verification layer: bias reduction, hallucination mitigation  
+**Cursor** agent → execution: parallel AI models, ask-before-act mode  
 
 **Three** models. ***One*** system. An *AI Mission Assistant*, built between dinner and bedtime.
 
@@ -20,11 +20,12 @@ From there, I orchestrated an **agentic system** with specialized AI roles:
 
 ---
 
-## 📸 Screenshots / Demo
+## 📸 Demo / Gif
 
 📺 **Live Demo**: https://ai-mission-assistant-demo.vercel.app
 Backend: https://ai-mission-assistant-demo.onrender.com
 
+<img width="50%" alt="ai-mission-demo" src="https://github.com/user-attachments/assets/05bb73ed-18c7-4895-b254-e5ec998e7c9f" />
 
 ---
 
