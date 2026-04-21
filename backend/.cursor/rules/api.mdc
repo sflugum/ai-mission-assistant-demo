@@ -1,5 +1,5 @@
 ---
-globs: ["backend/**/*.js"]
+globs: ["backend/**/*.js", "backend/*.js"]
 ---
 
 API rules:

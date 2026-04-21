@@ -1,5 +1,5 @@
 ---
-globs: ["frontend/**/*.jsx"]
+globs: ["frontend/*.js", "frontend/**/*.js"]
 ---
 
 UI rules:

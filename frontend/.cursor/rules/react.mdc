@@ -1,5 +1,5 @@
 ---
-globs: ["frontend/**/*.jsx", "frontend/**/*.js"]
+globs: ["frontend/*.js", "frontend/**/*.js"]
 ---
 
 React rules:
