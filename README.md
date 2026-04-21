@@ -29,6 +29,8 @@ Backend: https://ai-mission-assistant-demo.onrender.com
 
 ---
 
+⚠️ Backend logic currently consolidated into a single service file; refactoring in progress to modularize architecture for scalability and maintainability.
+
 ## ⚡ Key Features
 
 -   **Instant Concept to Motion:** AI Mission Assistant takes your vague ideas and transforms them into structured, actionable plans.
