@@ -29,7 +29,7 @@ Backend: https://ai-mission-assistant-demo.onrender.com
 
 ---
 
-⚠️ Backend logic currently consolidated into a single service file; refactoring in progress to modularize architecture for scalability and maintainability.
+⚠️ Backend and frontend logic currently consolidated into single files in their respective folders; refactoring in progress to modularize architecture for scalability and maintainability. Starting with backend on refactor-backend branch.
 
 ## ⚡ Key Features
 
