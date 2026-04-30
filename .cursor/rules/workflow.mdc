@@ -5,15 +5,16 @@ alwaysApply: true
 WORKFLOW:
 
 When implementing features:
-1. Start with the smallest working version
-2. Avoid multi-step architecture unless necessary
-3. Do not plan ahead for scalability
-4. Do not refactor unless explicitly asked
+1. Do not refactor unless explicitly asked
 
 When modifying code:
 - Change ONLY what is requested
 - Do NOT rewrite entire files
 - Preserve existing structure
+
+Using API:
+- When using API, only one attempt at a time.
+- If 1st attempt fails, stop and wait for further instruction.
 
 Ambiguity handling:
 - If ambiguity is LOW:

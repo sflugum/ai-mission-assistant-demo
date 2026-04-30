@@ -2,12 +2,6 @@
 globs: ["backend/**/*.js", "backend/*.js"]
 ---
 
-Express rules:
-
-- Keep everything minimal
-- Prefer single-file server when possible
-- No MVC structure unless necessary
 
 Routes:
 - Inline route handlers
-- No controller/service split unless requested

@@ -1,1 +1,0 @@
-// Fetch config with Vercel env variable or localhost

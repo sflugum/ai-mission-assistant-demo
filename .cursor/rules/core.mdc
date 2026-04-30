@@ -4,19 +4,11 @@ alwaysApply: true
 
 You are working in a rapid prototype environment.
 
-PRIORITIES (in order):
-1. Simplicity over completeness
-2. Working code over "best practice"
-3. Minimal files over abstraction
-
 RULES:
 - Do NOT introduce unnecessary files
 - Do NOT abstract prematurely
-- Do NOT use TypeScript
 - Do NOT add libraries unless explicitly required
-- Prefer single-file implementations when possible
 
 OUTPUT:
 - Return only the code requested
-- No explanations unless asked
-- No extra features
+- No extra features unless asked
