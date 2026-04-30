@@ -2,13 +2,7 @@
 globs: ["frontend/*.js", "frontend/**/*.js"]
 ---
 
-React rules:
-
-- Use functional components only
-- Use useState/useEffect only (no advanced hooks)
-- No context unless explicitly requested
-- Keep components small and simple
 
 Structure:
-- One component per file ONLY if necessary
-- Otherwise inline components are fine
+- One component per file 
+

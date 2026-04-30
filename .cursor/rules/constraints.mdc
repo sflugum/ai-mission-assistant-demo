@@ -4,14 +4,15 @@ alwaysApply: true
 
 STRICT CONSTRAINTS:
 
+Ask before act
+
 - Stack is fixed:
   - Frontend: React (Vite) + Tailwind
   - Backend: Node.js + Express
   - Database: SQLite
 
 - NEVER:
-  - Convert to TypeScript
-  - Introduce frameworks (Next.js, NestJS, etc.)
+  - Introduce frameworks (Next.js, NestJS, etc.) unless asked
   - Add authentication unless asked
   - Add testing frameworks unless asked
   - Add Docker unless asked
