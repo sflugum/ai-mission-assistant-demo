@@ -15,8 +15,11 @@ Backend: https://ai-mission-assistant-demo.onrender.com
 ---
 
 ## 🏗️ System Evolution
+
 The evolution of this project represents a shift from rapid feature prototyping to production-grade system hardening. Throughout development, I maintained a "Human-in-the-Loop" architecture to ensure every output meets strict logic and safety standards.
+
     - Supervised Architectural Refactor: I directed the transition from a monolithic structure to a modular Service Layer. While I used AI to help move the code, I acted as the lead architect—questioning logic, enforcing file structure, and manually intervening whenever the AI drifted toward over-abstraction.
+    
     - Zero-Trust Code Quality: I maintained a "Trust but Verify" policy. Every module was combed through for accuracy. I frequently paused the AI agent to question its decisions, ensuring the final codebase was intentional and follow-able.
   
 ---
@@ -47,10 +50,12 @@ I am currently implementing Dynamic API Management to handle real-world constrai
 
 ### Quick Start (Docker)
 
+
 ```
 git clone https://github.com/sflugum/ai-mission-assistant-demo
 docker-compose up --build
 ```
+
 
 ### Manual Installation
 
