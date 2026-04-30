@@ -1,22 +1,7 @@
-# Reverse Prompt Case Study
-## AI Mission Assistant
+# AI Mission Assistant
 
 
-I saw the **job post**, then hit the keyboard, tapping. **Five hours** later, I had a ***fully functional prototype.***
-
-The job description became my **client**, and my first move was treating it like one.
-
-I fed the post to *GPT-4* to extract and synthesize requirements, then used those to prompt ~~**Claude Sonnet 4.6*~~ to produce a tight PRD. That doc launched my Cursor project.
-
-From there, I orchestrated an **agentic system** with specialized AI roles:
-
-**GPT-4** → primary consultant: high-level research, strategic logic  
-**Google AI** → verification layer: bias reduction, hallucination mitigation  
-**Cursor** agent → execution: parallel AI models, ask-before-act mode  
-
-**Three** models. ***One*** system. An *AI Mission Assistant*, built between dinner and bedtime.
-
-***Honorable Mention**: Claude Sonnet 4.6 was initially used as a secondary consultant, but replaced by Google AI Overview / AI Mode after PRD completion due to performance constraints. 👾
+### AI Mission Assistant is a full-stack application that transforms natural language ideas into structured project frameworks. This project serves as a showcase of High-Speed AI Orchestration paired with Strict Engineering Oversight.
 
 ---
 
@@ -29,13 +14,51 @@ Backend: https://ai-mission-assistant-demo.onrender.com
 
 ---
 
-⚠️ Backend and frontend logic currently consolidated into single files in their respective folders; refactoring in progress to modularize architecture for scalability and maintainability. Starting with backend on refactor-backend branch.
+## 🏗️ System Evolution
+The evolution of this project represents a shift from rapid feature prototyping to production-grade system hardening. Throughout development, I maintained a "Human-in-the-Loop" architecture to ensure every output meets strict logic and safety standards.
+    - Supervised Architectural Refactor: I directed the transition from a monolithic structure to a modular Service Layer. While I used AI to help move the code, I acted as the lead architect—questioning logic, enforcing file structure, and manually intervening whenever the AI drifted toward over-abstraction.
+    - Zero-Trust Code Quality: I maintained a "Trust but Verify" policy. Every module was combed through for accuracy. I frequently paused the AI agent to question its decisions, ensuring the final codebase was intentional and follow-able.
+  
+---
 
-## ⚡ Key Features
+## 🤖 Multi-Model Verification Workflow
 
--   **Instant Concept to Motion:** AI Mission Assistant takes your vague ideas and transforms them into structured, actionable plans.
--   **Structured IRAD Analysis:** Instantly generates three critical pillars using an Internal Research and Development (IRAD) approach: **Action Plan**, **Risks**, and **Tools**.
--   **Google Studio AI Powered:** Delivers comprehensive, AI-curated output for rapid decision-making using the latest Gemini models.
+I developed a "Multi-AI" workflow designed to minimize errors and maximize speed:
+
+    - The Lead Agent (Cursor): Used for rapid code execution and boilerplate generation. I operated this in "ask-before-act" mode, requiring manual approval for every file change.
+
+    - The External Consultant (Gemini): To prevent "hallucinations," I used Gemini as an external reference to cross-verify the code produced by the Lead Agent. This "Double-AI" check ensured that the logic was technically sound and followed modern best practices.
+
+    - The Project Engine: The application is powered by the Gemini 2.5 Flash API, handling the core natural language processing tasks.
+
+---
+
+## 📈 Current Sprint: Dynamic Reliability
+
+I am currently implementing Dynamic API Management to handle real-world constraints:
+
+    - Resilient API Calls: Developing automated retry logic and exponential backoff to handle "Server Busy" errors gracefully.
+
+    - Modular API Adapter: Designing a flexible configuration that allows for hot-swapping AI models to ensure the service remains available during high-traffic periods.
+
+---
+
+## 💻 Local Setup
+
+### Quick Start (Docker)
+
+```
+git clone https://github.com/sflugum/ai-mission-assistant-demo
+docker-compose up --build
+```
+
+### Manual Installation
+
+1. Backend: cd backend && npm install && npm start
+
+2. Frontend: cd frontend && npm install && npm run dev
+
+3. Configuration: Add your GEMINI_API_KEY to the /backend/.env file.
 
 ---
 
@@ -51,71 +74,10 @@ Backend: https://ai-mission-assistant-demo.onrender.com
 ### 🕸️ Agentic System Architecture
 
 1. **Human-in-the-Loop (HITL)**: Engineering oversight, code approval, and a no-trust verification policy to ensure safety and accuracy.
-2. **GPT-4**: Strategic Consultant for research, architecture structure, and rapid troubleshooting. Context management to distill agent prompts for clearer instructions.
+2. **Gemini**: Strategic Consultant for research, architecture structure, and rapid troubleshooting. Context management to distill agent prompts for clearer instructions.
 3. **Cursor Integrated Agent:** Multi-model code generation utilizing "ask-before-act" directives with strict guardrails.
 4. **Google AI Overview / AI Mode**: Secondary consultant for verification, cross-referencing, and hallucination mitigation.
 
----
-
-## 🌵 Issues Encountered / Lessons Learned 💡
-
-- Cursor agent automatically retried API calls when failure occurred. This caused limit issues with free API being used.
-    - Moving forward, I will ensure agent is instructed to pause after failure, report finding, and require my input to proceed.
-- Variable mismatch between 'plan' and 'actionPlan' occurred during API build and affected JSON responses.
-    - Paused to complete full app 'migration' to ensure only 'actionplan' appears on both ends.
-    - Need to ensure agent has strict variable naming protocol to prevent future issues.
-- Needed to switch API AI model due to high traffic
-    - Will ensure the agent is instructed to keep API configuration modular so it can be easily changed  
-
----
-
-## 💻 Running AI Mission Assistant Locally
-
-### Prerequisites
-- Node.js: v18.0.0 or higher
-- npm: v9.0.0 or higher
-
-**1. ⌛ Installation**
-Clone the repository and install all dependencies for both frontend and backend.
-
-```Bash
-git clone https://github.com/sflugum/ai-mission-assistant-demo
-cd ai-mission-assistant-demo
-
-# Install all dependencies
-cd backend && npm install
-cd ../frontend && npm install
-```
-
-**2. 🧱 Environment Configuration**
-Navigate to the backend directory and set up your environment variables.
-```Bash
-cd backend
-cp .env.example .env
-```
-
-**3. 🎬 Running the Application**
-Two separate terminal windows are needed to run the full-stack suite
-
-### Terminal 1 (Backend)
-```Bash
-cd backend
-npm start
-```
-*Running on: http://localhost:3001*
-
-### Terminal 2 (Frontend)
-```Bash
-cd frontend
-npm run dev
-```
-*Running on: http://localhost:5173*
-
----
-
-## 📡 API & Proxy Architecture
-The frontend uses a Vite development proxy. 
-All requests made to /analyze on the frontend are automatically routed to the backend at http://localhost:3001/analyze, eliminating CORS issues during development.
 
 
 
