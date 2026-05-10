@@ -1,0 +1,16 @@
+# Vector pipeline for local development: tail every container's stdout/stderr
+# via the Docker Engine API and print the unified stream to the console.
+
+data_dir: /var/lib/vector
+
+sources:
+  docker_logs:
+    type: docker_logs
+
+sinks:
+  console:
+    type: console
+    inputs:
+      - docker_logs
+    encoding:
+      codec: json
