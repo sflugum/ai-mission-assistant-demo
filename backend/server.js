@@ -2,6 +2,11 @@ import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
 import missionRoutes from './src/routes/missionRoutes.js'
+import {
+  errorHandler,
+  HttpError,
+  notFoundHandler
+} from './src/middleware/errorMiddleware.js'
 
 // Nodemon does not reload .env on change — restart the server after editing backend/.env.
 
@@ -18,7 +23,9 @@ app.use(
       if (allowedOrigins.includes(origin)) {
         return callback(null, true)
       }
-      return callback(new Error('CORS Policy: This origin is not allowed.'))
+      return callback(
+        new HttpError(403, 'CORS Policy: This origin is not allowed.')
+      )
     }
   })
 )
@@ -29,6 +36,9 @@ app.get('/health', (_req, res) => {
 })
 
 app.use(missionRoutes)
+
+app.use(notFoundHandler)
+app.use(errorHandler)
 
 const port = Number(process.env.PORT || 3001)
 app.listen(port, () => {

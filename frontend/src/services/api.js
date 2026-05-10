@@ -18,7 +18,20 @@ export async function analyzeMission(input) {
 
   if (!res.ok) {
     const text = await res.text().catch(() => '')
-    throw new Error(text ? `Request failed: ${text}` : `Request failed: ${res.status}`)
+    let message = `Request failed: ${res.status}`
+    if (text) {
+      try {
+        const body = JSON.parse(text)
+        if (body && typeof body.message === 'string' && body.message.length > 0) {
+          message = body.message
+        } else {
+          message = text
+        }
+      } catch {
+        message = text
+      }
+    }
+    throw new Error(message)
   }
 
   return res.json()
