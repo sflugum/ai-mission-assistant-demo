@@ -1,69 +1,54 @@
 # AI Mission Assistant
 
+AI Mission Assistant transforms natural language ideas into structured project frameworks. Users describe a goal in plain language and receive a breakdown of action steps, potential risks, and recommended tools. Powered by the Gemini 2.5 Flash API.
 
-### AI Mission Assistant is a full-stack application that transforms natural language ideas into structured project frameworks. This project serves as a showcase of High-Speed AI Orchestration paired with Strict Engineering Oversight.
+This project documents my process of building a full-stack AI application with an emphasis on responsible development: deliberate architectural decisions, human-in-the-loop verification, and tradeoffs made to keep the system intentional and maintainable.
+
+## Demo / Gif
+
+🔗 **Live Demo**: <https://ai-mission-assistant-demo.vercel.app>
+🔗 Backend: <https://ai-mission-assistant-demo.onrender.com>
+
+📺 <img width="50%" alt="ai-mission-demo" src="https://github.com/user-attachments/assets/05bb73ed-18c7-4895-b254-e5ec998e7c9f" />
 
 ---
 
-## 📸 Demo / Gif
+## ✨ Features
 
-📺 **Live Demo**: https://ai-mission-assistant-demo.vercel.app
-Backend: https://ai-mission-assistant-demo.onrender.com
-
-<img width="50%" alt="ai-mission-demo" src="https://github.com/user-attachments/assets/05bb73ed-18c7-4895-b254-e5ec998e7c9f" />
+* **Mission Analysis**: Describe any goal in plain language and receive a structured breakdown of action steps, potential risks, and recommended tools.
+* **Mission History**: Save past missions and reload them for re-analysis via a persistent Supabase-backed mission list.
+* **Responsible AI Output**: Every response is generated through a verified, human-approved workflow — not raw, unreviewed model output.
+* **Flexible Local Setup**: Runs via Docker or manual install, with environment configurations for both local development and production deployment.
 
 ---
 
 ## 🏗️ System Evolution
 
-The evolution of this project represents a shift from rapid feature prototyping to production-grade system hardening. Throughout development, I maintained a "Human-in-the-Loop" architecture to ensure every output meets strict logic and safety standards.
+The development of this project represents a shift from feature prototyping to system hardening. I use a **Human-in-the-Loop (HITL)** architecture to ensure every output meets logic and safety standards.
 
-    - Supervised Architectural Refactor: I directed the transition from a monolithic structure to a modular Service Layer. While I used AI to help move the code, I acted as the lead architect—questioning logic, enforcing file structure, and manually intervening whenever the AI drifted toward over-abstraction.
-    
-    - Zero-Trust Code Quality: I maintained a "Trust but Verify" policy. Every module was combed through for accuracy. I frequently paused the AI agent to question its decisions, ensuring the final codebase was intentional and follow-able.
-  
----
-
-## 🤖 Multi-Model Verification Workflow
-
-I developed a "Multi-AI" workflow designed to minimize errors and maximize speed:
-
-    - The Lead Agent (Cursor): Used for rapid code execution and boilerplate generation. I operated this in "ask-before-act" mode, requiring manual approval for every file change.
-
-    - The External Consultant (Gemini): To prevent "hallucinations," I used Gemini as an external reference to cross-verify the code produced by the Lead Agent. This "Double-AI" check ensured that the logic was technically sound and followed modern best practices.
-
-    - The Project Engine: The application is powered by the Gemini 2.5 Flash API, handling the core natural language processing tasks.
+* **Modular Architectural Refactor**: Refactored from a monolithic structure to a modular service layer.
+* **Verification Policy**: Every module is audited for accuracy. I frequently pause agentic workflows to question logic, ensuring the codebase is intentional and maintainable.
 
 ---
 
-## 📈 Current Sprint: Dynamic Reliability
+## 🤖 Agentic Verification Workflow
 
-I am currently implementing Dynamic API Management to handle real-world constraints:
+A multi-model workflow designed to minimize hallucinations and ensure technical accuracy:
 
-    - Resilient API Calls: Developing automated retry logic and exponential backoff to handle "Server Busy" errors gracefully.
-
-    - Modular API Adapter: Designing a flexible configuration that allows for hot-swapping AI models to ensure the service remains available during high-traffic periods.
+* **Lead Agent (Cursor)**: Used for code execution in "ask-before-act" mode, requiring manual approval for every file change.
+* **Cross-Model Verification (Gemini)**: Used as an external consultant to cross-verify logic produced by the Lead Agent.
+* **Core Logic**: Application logic is powered by the **Gemini 2.5 Flash API** for natural language processing.
 
 ---
 
-## 💻 Local Setup
+## 📈 Roadmap
 
-### Quick Start (Docker)
+Planned updates focus on building system reliability, persistence, and multi-user support:
 
-
-```
-git clone https://github.com/sflugum/ai-mission-assistant-demo
-docker-compose up --build
-```
-
-
-### Manual Installation
-
-1. Backend: cd backend && npm install && npm start
-
-2. Frontend: cd frontend && npm install && npm run dev
-
-3. Configuration: Add your GEMINI_API_KEY to the /backend/.env file.
+* **Resilient API Calls**: Automated retry logic and exponential backoff to handle rate limits and "Server Busy" errors.
+* **Modular API Adapter**: A flexible configuration to allow swapping AI models to ensure service availability.
+* **Persistent Mission Results**: Store and retrieve full analysis results alongside saved missions, eliminating the need to re-run analysis.
+* **User Accounts**: Individual user authentication so each user has a private mission history.
 
 ---
 
@@ -71,23 +56,34 @@ docker-compose up --build
 
 ### ⚙️ App Stack
 
-- **Frontend**: React (Vite), Tailwind CSS
-- **Backend**: Node.js, Express 
-- **AI Model**: Google Gemini 2.5 Flash
-- **Deployment**: Render (backend), Vercel (frontend)
+* **Frontend**: React (Vite), Tailwind CSS
+* **Backend**: Node.js, Express
+* **Database**: Supabase (Postgres), Docker (Local)
+* **Deployment**: Render (Backend), Vercel (Frontend)
 
-### 🕸️ Agentic System Architecture
+### 🕸️ Agentic Systems & Orchestration
 
-1. **Human-in-the-Loop (HITL)**: Engineering oversight, code approval, and a no-trust verification policy to ensure safety and accuracy.
-2. **Gemini**: Strategic Consultant for research, architecture structure, and rapid troubleshooting. Context management to distill agent prompts for clearer instructions.
-3. **Cursor Integrated Agent:** Multi-model code generation utilizing "ask-before-act" directives with strict guardrails.
-4. **Google AI Overview / AI Mode**: Secondary consultant for verification, cross-referencing, and hallucination mitigation.
+* **Human-in-the-Loop (HITL)**: Manual code approval and output verification.
+* **Orchestration**: Multi-model prompting and context management to distill agent instructions.
+* **Verification**: Cross-referencing outputs between Cursor and Gemini to mitigate hallucinations.
 
+---
 
+## 💻 Local Setup
 
+### Quick Start (Docker)
 
+```bash
+git clone https://github.com/sflugum/ai-mission-assistant-demo
+docker-compose up --build
+```
 
+### Manual Installation
 
-
-
-
+1. **Backend**: `cd backend && npm install && npm start`
+2. **Frontend**: `cd frontend && npm install && npm run dev`
+3. **Environment Variables**:
+   * Copy `.env.example` to `.env` in both `/frontend` and `/backend`
+   * See comments inside each file for local vs. production configuration
+   * Required: `GOOGLE_API_KEY`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
+   * Optional: `PORT`, `CORS_ORIGIN`, `VITE_API_URL` (see comments for defaults)
