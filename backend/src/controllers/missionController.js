@@ -21,6 +21,7 @@ export async function analyzeMission(req, res) {
   validateAIResponse(analysis)
 
   const supabase = getSupabaseClient()
+  // PostgREST / supabase-js builders send parameterized requests (no string-built SQL).
   const { data: mission, error: dbError } = await supabase
     .from('missions')
     .insert({
