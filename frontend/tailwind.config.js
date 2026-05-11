@@ -11,11 +11,11 @@ export default {
       },
       colors: {
         /** design.mdc §1 — semantic roles */
-        surface: '#181818',
         primary: '#4aae8c',
         secondary: '#f75256',
         accent: '#fed734',
-        highlight: '#ffffff'
+        highlight: '#ffffff',
+        surface: '#181818'
       }
     }
   },

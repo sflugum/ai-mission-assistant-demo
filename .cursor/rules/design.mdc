@@ -9,11 +9,11 @@ globs: src/**/*.{js,jsx,ts,tsx}, src/styles/*.css
 >
 > Use these semantic classes to maintain theme consistency across Landing and Mission pages.
 
-1. `primary`: Main Action buttons and active UI states. (`bg-primary`)
-2. `secondary`: Success indicators or secondary "Learn More" actions. (`text-secondary`)
-3. `accent`: High-attention callouts, "New" badges, or alerts. (`text-accent`)
-4. `highlight`: Unique UI elements, special links, or featured icons. (`text-highlight`)
-5. `surface`: Secondary section backgrounds to create visual separation. (`bg-surface`)
+1. `primary` ( #4aae8c): Main Action buttons and active UI states. (`bg-primary`)
+2. `secondary` ( #f75256): Success indicators or secondary "Learn More" actions. (`text-secondary`)
+3. `accent` ( #fed734): High-attention callouts, "New" badges, or alerts. (`text-accent`)
+4. `highlight` ( #ffffff): Unique UI elements, special links, or featured icons. (`text-highlight`)
+5. `surface` ( #181818): Secondary section backgrounds to create visual separation. (`bg-surface`)
 
 ## 2. Anti-Clash Spacing Rules
 
