@@ -9,6 +9,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   snapshotPathTemplate: '{testDir}/snapshots/{testFileName}/{arg}{ext}',
   fullyParallel: true,
+  reporter: 'html',
 
   expect: {
     toHaveScreenshot: {
