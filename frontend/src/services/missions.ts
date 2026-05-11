@@ -4,7 +4,8 @@ export type SavedMissionRow = {
   id: string
   title: string
   status: string
-  updated_at: string
+  /** `updated_at` when that column exists, else falls back to `created_at`. */
+  lastActivityAt: string
 }
 
 export async function fetchSavedMissions(client: SupabaseClient | null): Promise<{
@@ -15,16 +16,50 @@ export async function fetchSavedMissions(client: SupabaseClient | null): Promise
     return { data: [], error: null }
   }
 
-  const { data, error } = await client
+  const withUpdated = await client
     .from('missions')
     .select('id, title, status, updated_at')
     .order('updated_at', { ascending: false })
 
-  if (error) {
-    return { data: [], error: new Error(error.message) }
+  if (!withUpdated.error) {
+    return {
+      data: (withUpdated.data ?? []).map(
+        (row: { id: string; title: string; status: string; updated_at: string }) => ({
+          id: row.id,
+          title: row.title,
+          status: row.status,
+          lastActivityAt: row.updated_at
+        })
+      ),
+      error: null
+    }
   }
 
-  return { data: (data ?? []) as SavedMissionRow[], error: null }
+  const msg = withUpdated.error?.message ?? ''
+  if (/updated_at|schema cache/i.test(msg)) {
+    const legacy = await client
+      .from('missions')
+      .select('id, title, status, created_at')
+      .order('created_at', { ascending: false })
+
+    if (legacy.error) {
+      return { data: [], error: new Error(legacy.error.message) }
+    }
+
+    return {
+      data: (legacy.data ?? []).map(
+        (row: { id: string; title: string; status: string; created_at: string }) => ({
+          id: row.id,
+          title: row.title,
+          status: row.status,
+          lastActivityAt: row.created_at
+        })
+      ),
+      error: null
+    }
+  }
+
+  return { data: [], error: new Error(msg || 'Failed to load missions') }
 }
 
 export async function fetchMissionById(

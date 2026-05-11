@@ -129,7 +129,7 @@ export default function MissionSelector() {
                         </p>
                       </div>
                       <p className="border-l-4 border-primary py-2 pl-6 font-sans text-sm leading-relaxed text-slate-600">
-                        Last updated {formatUpdatedAt(m.updated_at)}
+                        Last updated {formatUpdatedAt(m.lastActivityAt)}
                       </p>
                     </div>
                     <button
