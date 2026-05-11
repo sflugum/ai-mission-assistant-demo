@@ -1,4 +1,5 @@
 node_modules/
+frontend/.port_config.json
 .env
 .env.test
 dist/
