@@ -1,12 +1,20 @@
 {
+  "$schema": "https://json.schemastore.org/package.json",
   "name": "ai-mission-assistant-backend",
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "repo:types": "npm run types:generate --prefix ..",
+    "repo:test": "npm run test:run --prefix ..",
+    "repo:test:e2e": "npm run test:e2e --prefix ..",
+    "repo:db:test": "npm run db:test --prefix .."
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.105.4",

@@ -1,0 +1,8 @@
+{
+  "recommendations": [
+    "bradlc.vscode-tailwindcss",
+    "ms-playwright.playwright",
+    "supabase.supabase-vscode",
+    "vitest.explorer"
+  ]
+}

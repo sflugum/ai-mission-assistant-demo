@@ -1,8 +1,12 @@
 {
+  "$schema": "https://json.schemastore.org/package.json",
   "name": "ai-mission-assistant-frontend",
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",

@@ -12,9 +12,9 @@ export default defineConfig({
     ...devices['Desktop Chrome']
   },
   webServer: {
-    command: `npx vite --port ${E2E_PORT} --strictPort`,
+    command: `npx vite --port ${E2E_PORT} --strictPort --host 127.0.0.1`,
     url: `http://127.0.0.1:${E2E_PORT}`,
     reuseExistingServer: !process.env.CI,
-    timeout: 120_000
+    timeout: 180_000
   }
 })
