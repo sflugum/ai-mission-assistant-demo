@@ -1,0 +1,49 @@
+---
+description: Unified UI/UX design tokens mapped to your 5-color Tailwind config (surface, primary, secondary, accent, highlight).
+globs: src/**/*.{js,jsx,ts,tsx}, src/styles/*.css
+---
+
+# Design System & UI Stability Rules
+
+## 1. Design Tokens (The 5-Color Palette)
+>
+> Use these semantic classes to maintain theme consistency across Landing and Mission pages.
+
+1. `primary`: Main Action buttons and active UI states. (`bg-primary`)
+2. `secondary`: Success indicators or secondary "Learn More" actions. (`text-secondary`)
+3. `accent`: High-attention callouts, "New" badges, or alerts. (`text-accent`)
+4. `highlight`: Unique UI elements, special links, or featured icons. (`text-highlight`)
+5. `surface`: Secondary section backgrounds to create visual separation. (`bg-surface`)
+
+## 2. Anti-Clash Spacing Rules
+
+- **The Outer Limit:** All content MUST be wrapped in `<div class="max-w-7xl mx-auto px-6">`.
+- **Vertical Breathing:** Every major section MUST use `py-16 md:py-24`.
+- **Internal Spacing:** Use `space-y-6` for headers/paragraphs to prevent text clumping.
+
+## 3. Implementation Constraints
+
+- **Typography:** Use `font-heading` for all titles and `font-sans` for body/labels.
+- **Box Rules:** Never apply a `border` without at least `p-6` (Padding) to prevent text from touching edges.
+- **Interactive:** All buttons require `transition-all active:scale-95`.
+
+## 4. Plug & Play Hero Template
+
+```html
+<section class="py-20 bg-white">
+  <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
+    <div class="space-y-8">
+      <span class="text-highlight font-heading font-bold uppercase text-sm tracking-widest">Mission Update</span>
+      <h1 class="text-5xl font-heading font-bold text-slate-900 tracking-tight">Design with Precision</h1>
+      <p class="text-xl font-sans text-slate-600">Clean components built to function without visual noise.</p>
+      <div class="flex gap-4">
+        <button class="bg-primary text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:brightness-110 transition-all">Get Started</button>
+        <button class="border-2 border-secondary text-secondary px-8 py-3 rounded-xl font-semibold hover:bg-secondary/5 transition-all">Learn More</button>
+      </div>
+    </div>
+    <!-- Visual area using the 'surface' color to prevent clashing -->
+    <div class="bg-surface rounded-2xl aspect-video border border-slate-100 shadow-inner flex items-center justify-center">
+       <span class="text-accent font-bold">Feature Visualization</span>
+    </div>
+  </div>
+</section>
