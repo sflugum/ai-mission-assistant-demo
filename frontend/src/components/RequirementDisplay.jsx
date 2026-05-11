@@ -11,7 +11,7 @@ function Section({ title, items, loading, accentBorder }) {
       <h2 className="font-heading text-lg font-bold text-highlight md:text-xl">
         {title}
       </h2>
-      <div className="space-y-6 rounded-xl border border-slate-700 bg-black/30 p-6 shadow-sm md:p-8">
+      <div className="space-y-6 rounded-xl border border-slate-700 bg-[#151515] p-6 md:p-8">
         {loading && (items ?? []).length === 0 ? (
           <p className="font-sans leading-relaxed text-slate-300">Generating…</p>
         ) : (items ?? []).length === 0 ? (

@@ -14,10 +14,10 @@ import {
 } from './MissionMarketingHero'
 
 const btnResumeCard =
-  'inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border-2 border-primary bg-white px-4 py-2 text-sm font-semibold text-primary shadow-sm transition-all hover:bg-primary/10 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white'
+  'inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border-2 border-primary bg-white px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10 active:bg-primary/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white'
 
 const btnDeleteCard =
-  'inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border-2 border-secondary bg-white px-4 py-2 text-sm font-semibold text-secondary shadow-sm transition-all hover:bg-secondary/10 active:scale-95 disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white'
+  'inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border-2 border-secondary bg-white px-4 py-2 text-sm font-semibold text-secondary transition-colors hover:bg-secondary/10 active:bg-secondary/15 disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white'
 
 function formatUpdatedAt(iso: string): string {
   try {
@@ -126,7 +126,7 @@ export default function MissionSelector() {
             </div>
 
             {deleteError ? (
-              <p className="rounded-xl border border-secondary/40 bg-black/40 p-4 font-sans text-sm text-secondary shadow-sm md:p-6">
+              <p className="rounded-xl border border-secondary/40 bg-[#0d0d0d] p-4 font-sans text-sm text-secondary md:p-6">
                 {deleteError}
               </p>
             ) : null}
@@ -134,11 +134,11 @@ export default function MissionSelector() {
             {listLoading ? (
               <p className="font-sans text-slate-400">Loading missions…</p>
             ) : listError ? (
-              <p className="rounded-xl border border-secondary/40 bg-black/40 p-6 font-sans text-secondary shadow-sm md:p-8">
+              <p className="rounded-xl border border-secondary/40 bg-[#0d0d0d] p-6 font-sans text-secondary md:p-8">
                 {listError}
               </p>
             ) : missions.length === 0 ? (
-              <div className="rounded-xl border border-slate-700 bg-black/30 p-6 shadow-sm md:p-8">
+              <div className="rounded-xl border border-slate-700 bg-[#151515] p-6 md:p-8">
                 <p className="text-center font-sans text-lg leading-relaxed text-slate-300">
                   No saved missions yet. Start above, run Analyze once, and your
                   mission will slot into this three-column grid.
@@ -149,7 +149,7 @@ export default function MissionSelector() {
                 {missions.map((m) => (
                   <li
                     key={m.id}
-                    className="flex flex-col space-y-6 rounded-xl border border-slate-700 bg-white p-6 shadow-sm md:p-8"
+                    className="flex flex-col space-y-6 rounded-xl border border-slate-700 bg-white p-6 md:p-8"
                   >
                     <div className="space-y-6">
                       <div className="space-y-6">

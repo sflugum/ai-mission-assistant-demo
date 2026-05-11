@@ -22,7 +22,7 @@ export default function ResultsPage() {
       <main id="main-content" tabIndex={-1} className="bg-surface py-16 outline-none md:py-24">
         <div className="mx-auto max-w-7xl px-6">
           {input.trim() ? (
-            <p className="mb-12 rounded-xl border border-slate-700 bg-black/30 p-6 font-sans text-sm leading-relaxed text-slate-300 shadow-sm md:p-8 md:text-base">
+            <p className="mb-12 rounded-xl border border-slate-700 bg-[#151515] p-6 font-sans text-sm leading-relaxed text-slate-300 md:p-8 md:text-base">
               <span className="font-semibold text-highlight">Brief: </span>
               {input.trim()}
             </p>
@@ -34,7 +34,7 @@ export default function ResultsPage() {
             <p className="mt-10 text-center font-sans text-slate-400">
               <Link
                 to="/"
-                className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center font-heading text-sm font-bold text-primary underline decoration-accent decoration-2 underline-offset-4 hover:brightness-110 focus-visible:outline-none"
+                className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center font-heading text-sm font-bold text-primary underline decoration-accent decoration-2 underline-offset-4 hover:text-[#3d997c] focus-visible:outline-none"
               >
                 Return home to run Analyze
               </Link>

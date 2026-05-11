@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 
 const linkBack =
-  'mb-6 inline-flex min-h-[44px] min-w-[44px] items-center font-sans text-sm font-semibold text-primary underline decoration-accent decoration-2 underline-offset-4 transition-colors hover:text-slate-900 hover:brightness-110 active:scale-95 focus-visible:outline-none'
+  'mb-6 inline-flex min-h-[44px] min-w-[44px] items-center font-sans text-sm font-semibold text-primary underline decoration-accent decoration-2 underline-offset-4 transition-colors hover:text-slate-950 focus-visible:outline-none'
 
 export default function Header({ homeLink, backLabel = 'All missions' }) {
   return (
