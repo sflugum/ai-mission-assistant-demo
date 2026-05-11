@@ -9,7 +9,11 @@ This project documents my process of building a full-stack AI application with a
 🔗 **Live Demo**: <https://ai-mission-assistant-demo.vercel.app>
 🔗 Backend: <https://ai-mission-assistant-demo.onrender.com>
 
+Original Build:
 📺 <img width="50%" alt="ai-mission-demo" src="https://github.com/user-attachments/assets/05bb73ed-18c7-4895-b254-e5ec998e7c9f" />
+
+Current Build:
+Incoming...
 
 ---
 
@@ -28,6 +32,44 @@ The development of this project represents a shift from feature prototyping to s
 
 * **Modular Architectural Refactor**: Refactored from a monolithic structure to a modular service layer.
 * **Verification Policy**: Every module is audited for accuracy. I frequently pause agentic workflows to question logic, ensuring the codebase is intentional and maintainable.
+
+---
+
+## 🧪 Testing
+
+Automated testing runs in CI via `.github/workflows/ci.yaml` in this order: `test:run` → `test:e2e` → `build`.
+
+### Test Suite (12 checks total)
+
+**Database — pgTAP** (`npm run db:test` → `supabase db test --local`)
+
+| File | What it asserts |
+|------|-----------------|
+| `supabase/tests/database/missions_schema.test.sql` | `public.missions` table exists (migrations applied). |
+
+**Unit / Integration — Vitest** (`npm run test:run` → frontend Vitest)
+
+| File | Suite / cases |
+|------|---------------|
+| `frontend/src/services/aiService.test.js` | `describe('aiService.analyzeMission')` — 5 tests: POST `/analyze` + body; error from JSON body; error from plain text; default message when body empty; absolute URL when `VITE_API_URL` is set. |
+
+**End-to-End — Playwright** (`npm run test:e2e`)
+
+| File | Tests |
+|------|-------|
+| `frontend/e2e/smoke.spec.ts` | App loads and document title matches `/AI Mission Assistant/`. |
+| `frontend/e2e/landing.spec.ts` | Landing H1 renders; "Start new mission" navigates to `/mission/new`. |
+| `frontend/e2e/visual-regression.spec.ts` | Full-page screenshot baselines for `/` and `/mission/new`. |
+| `frontend/e2e/analyze-route-mock.spec.ts` | Mocked `/analyze`: JSON 500 message + screenshot; opaque 500 → `Request failed: 500`. |
+
+> **Note:** There are no backend-specific test files; the backend is exercised indirectly via E2E tests against the running app (when not mocked). `npm run build` runs `vite build` only and does not invoke the test suite.
+
+| Layer | Count |
+|-------|-------|
+| pgTAP | 1 |
+| Vitest | 5 |
+| Playwright | 6 |
+| **Total** | **12** |
 
 ---
 
