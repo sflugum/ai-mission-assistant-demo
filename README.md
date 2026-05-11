@@ -10,9 +10,11 @@ This project documents my process of building a full-stack AI application with a
 🔗 Backend: <https://ai-mission-assistant-demo.onrender.com>
 
 Original Build:
+
 📺 <img width="50%" alt="ai-mission-demo" src="https://github.com/user-attachments/assets/05bb73ed-18c7-4895-b254-e5ec998e7c9f" />
 
 Current Build:
+
 Incoming...
 
 ---
