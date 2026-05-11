@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getBrowserSupabase } from '../../lib/supabaseClient'
 import {
+  deleteSavedMission,
   fetchSavedMissions,
   type SavedMissionRow
 } from '../../services/missions'
@@ -13,7 +14,10 @@ import {
 } from './MissionMarketingHero'
 
 const btnResumeCard =
-  'inline-flex items-center justify-center rounded-xl border-2 border-primary bg-white px-4 py-2 text-sm font-semibold text-primary shadow-sm transition-all hover:bg-primary/10 active:scale-95'
+  'inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border-2 border-primary bg-white px-4 py-2 text-sm font-semibold text-primary shadow-sm transition-all hover:bg-primary/10 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white'
+
+const btnDeleteCard =
+  'inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border-2 border-secondary bg-white px-4 py-2 text-sm font-semibold text-secondary shadow-sm transition-all hover:bg-secondary/10 active:scale-95 disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white'
 
 function formatUpdatedAt(iso: string): string {
   try {
@@ -33,6 +37,8 @@ export default function MissionSelector() {
   const [missions, setMissions] = useState<SavedMissionRow[]>([])
   const [listLoading, setListLoading] = useState(true)
   const [listError, setListError] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   useEffect(() => {
     const client = getBrowserSupabase()
@@ -63,8 +69,28 @@ export default function MissionSelector() {
     })
   }
 
+  async function handleDeleteMission(m: SavedMissionRow) {
+    const rawTitle = (m.title ?? '').trim() || 'Untitled mission'
+    const label = rawTitle.length > 72 ? `${rawTitle.slice(0, 72)}…` : rawTitle
+    if (!window.confirm(`Delete "${label}"? This cannot be undone.`)) return
+
+    const client = getBrowserSupabase()
+    setDeleteError(null)
+    setDeletingId(m.id)
+
+    const { error } = await deleteSavedMission(client, m.id)
+    setDeletingId(null)
+
+    if (error) {
+      setDeleteError(error.message)
+      return
+    }
+
+    setMissions((prev) => prev.filter((row) => row.id !== m.id))
+  }
+
   return (
-    <div className="min-h-screen bg-black">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-black outline-none">
       <MissionMarketingHero
         description={<MarketingHeroTagline />}
         actions={
@@ -99,6 +125,12 @@ export default function MissionSelector() {
               </p>
             </div>
 
+            {deleteError ? (
+              <p className="rounded-xl border border-secondary/40 bg-black/40 p-4 font-sans text-sm text-secondary shadow-sm md:p-6">
+                {deleteError}
+              </p>
+            ) : null}
+
             {listLoading ? (
               <p className="font-sans text-slate-400">Loading missions…</p>
             ) : listError ? (
@@ -128,17 +160,27 @@ export default function MissionSelector() {
                           {m.status}
                         </p>
                       </div>
-                      <p className="border-l-4 border-primary py-2 pl-6 font-sans text-sm leading-relaxed text-slate-600">
+                      <p className="border-l-4 border-accent py-2 pl-6 font-sans text-sm leading-relaxed text-slate-700">
                         Last updated {formatUpdatedAt(m.lastActivityAt)}
                       </p>
                     </div>
-                    <button
-                      type="button"
-                      className={`${btnResumeCard} mt-auto self-start`}
-                      onClick={() => navigate(`/mission/${m.id}`)}
-                    >
-                      Resume
-                    </button>
+                    <div className="mt-auto flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        className={btnResumeCard}
+                        onClick={() => navigate(`/mission/${m.id}`)}
+                      >
+                        Resume
+                      </button>
+                      <button
+                        type="button"
+                        className={btnDeleteCard}
+                        disabled={deletingId === m.id}
+                        onClick={() => handleDeleteMission(m)}
+                      >
+                        {deletingId === m.id ? 'Deleting…' : 'Delete'}
+                      </button>
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -146,6 +188,6 @@ export default function MissionSelector() {
           </div>
         </div>
       </section>
-    </div>
+    </main>
   )
 }

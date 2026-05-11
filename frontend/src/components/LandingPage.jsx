@@ -31,7 +31,7 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-black outline-none">
       <MissionMarketingHero
         description={<MarketingHeroTagline />}
         actions={
@@ -60,7 +60,7 @@ export default function LandingPage() {
               <span className="font-heading text-sm font-bold uppercase tracking-widest text-highlight">
                 Quick analyze
               </span>
-              <div className="space-y-6 border-l-4 border-primary py-2 pl-6">
+              <div className="space-y-6 border-l-4 border-accent py-2 pl-6">
                 <h2 className="font-heading text-xl font-bold text-highlight md:text-2xl">
                   Try a mission brief
                 </h2>
@@ -82,6 +82,6 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-    </div>
+    </main>
   )
 }

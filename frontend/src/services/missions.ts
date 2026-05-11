@@ -62,6 +62,23 @@ export async function fetchSavedMissions(client: SupabaseClient | null): Promise
   return { data: [], error: new Error(msg || 'Failed to load missions') }
 }
 
+export async function deleteSavedMission(
+  client: SupabaseClient | null,
+  id: string
+): Promise<{ error: Error | null }> {
+  if (!client) {
+    return { error: new Error('Supabase is not configured') }
+  }
+
+  const { error } = await client.from('missions').delete().eq('id', id)
+
+  if (error) {
+    return { error: new Error(error.message) }
+  }
+
+  return { error: null }
+}
+
 export async function fetchMissionById(
   client: SupabaseClient | null,
   id: string

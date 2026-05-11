@@ -24,7 +24,7 @@ function MissionWorkspacePageInner({ missionId }) {
         </div>
       </header>
 
-      <main className="bg-surface py-16 md:py-24">
+      <main id="main-content" tabIndex={-1} className="bg-surface py-16 outline-none md:py-24">
         <div className="mx-auto max-w-7xl px-6">
           {bootstrapping ? (
             <p className="font-sans text-slate-400">Loading mission…</p>
@@ -35,7 +35,7 @@ function MissionWorkspacePageInner({ missionId }) {
                   <span className="font-heading text-sm font-bold uppercase tracking-widest text-highlight">
                     Mission focus
                   </span>
-                  <div className="space-y-6 border-l-4 border-primary py-2 pl-6">
+                  <div className="space-y-6 border-l-4 border-accent py-2 pl-6">
                     <h2 className="font-heading text-xl font-bold text-highlight md:text-2xl">
                       Mission statement
                     </h2>

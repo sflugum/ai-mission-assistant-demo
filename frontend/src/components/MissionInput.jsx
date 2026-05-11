@@ -1,5 +1,5 @@
 const btnAnalyzeBase =
-  'rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-md transition-all hover:brightness-110 active:scale-95 disabled:opacity-60'
+  'min-h-[44px] min-w-[44px] rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-md transition-all hover:brightness-110 active:scale-95 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface'
 
 export default function MissionInput({
   input,
@@ -15,12 +15,15 @@ export default function MissionInput({
 
   return (
     <form onSubmit={onSubmit} className="space-y-8">
-      <label className="block space-y-6">
+      <label className="block space-y-6" htmlFor="mission-input">
         <span className="block font-sans text-sm font-semibold text-highlight">
           Mission input
         </span>
         <textarea
-          className="w-full min-h-[140px] resize-y rounded-xl border border-slate-600 bg-black/40 p-6 font-sans text-base leading-relaxed text-slate-100 shadow-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/30"
+          id="mission-input"
+          autoComplete="off"
+          spellCheck="true"
+          className="w-full min-h-[140px] resize-y rounded-xl border border-slate-600 bg-black/40 p-6 font-sans text-base leading-relaxed text-slate-100 shadow-sm outline-none transition-all focus-visible:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
           value={input}
           onChange={(e) => onInputChange(e.target.value)}
           placeholder="Paste or type your mission brief…"
@@ -37,7 +40,7 @@ export default function MissionInput({
         </button>
 
         {error ? (
-          <p className="flex-1 rounded-xl border border-accent/50 bg-black/50 p-6 font-sans text-sm font-medium text-accent shadow-sm sm:mt-0 sm:max-w-xl">
+          <p className="flex-1 rounded-xl border border-slate-600 border-l-accent bg-black/70 p-6 font-sans text-sm font-medium leading-relaxed text-highlight shadow-sm sm:mt-0 sm:max-w-xl">
             {error}
           </p>
         ) : null}
