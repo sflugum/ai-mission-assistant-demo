@@ -1,0 +1,15 @@
+# Monorepo build context (docker compose uses repo root). Keep daemon upload small.
+node_modules
+**/node_modules
+.git
+**/.git
+.cursor
+dist
+**/dist
+coverage
+test-results
+playwright-report
+blob-report
+*.log
+.env
+**/.env

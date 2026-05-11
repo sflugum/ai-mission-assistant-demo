@@ -1,30 +1,97 @@
-import { useState } from 'react'
-import { analyzeMission } from '../services/api.js'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { analyzeMissionNormalized } from '../services/analyzeNormalized.js'
+import { getBrowserSupabase } from '../lib/supabaseClient'
+import { fetchMissionById } from '../services/missions'
 
+// Module-level ids: ignore late responses if missionId or submit race changes mid-flight.
 let requestCounter = 0
 let latestRequestId = 0
 
-function normalizeResponse(data) {
-  return {
-    actionPlan: data.actionPlan,
-    risks: data.risks,
-    tools: data.tools
-  }
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+
+function isNewMissionRoute(missionId) {
+  return !missionId || missionId === 'new'
 }
 
-export function useMission() {
-  const [input, setInput] = useState(
-    'assess this risk and plan a launch (include missing risks)'
-  )
+function isValidMissionUuid(id) {
+  return typeof id === 'string' && UUID_RE.test(id)
+}
+
+/**
+ * `/mission/new` starts empty; `/mission/:uuid` hydrates from Supabase. Analyze uses the same normalized shape as the landing quick-flow.
+ */
+export function useMission(missionId) {
+  const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [bootstrapping, setBootstrapping] = useState(() => !isNewMissionRoute(missionId))
   const [error, setError] = useState('')
   const [result, setResult] = useState({ actionPlan: [], risks: [], tools: [] })
 
-  const canSubmit = input.trim().length > 0 && !loading
+  const loadGen = useRef(0)
+
+  const resetMissionState = useCallback(() => {
+    setInput('')
+    setResult({ actionPlan: [], risks: [], tools: [] })
+    setError('')
+    setLoading(false)
+  }, [])
+
+  useEffect(() => {
+    if (isNewMissionRoute(missionId)) {
+      resetMissionState()
+      setBootstrapping(false)
+      return
+    }
+
+    if (!isValidMissionUuid(missionId)) {
+      resetMissionState()
+      setError('Invalid mission id')
+      setBootstrapping(false)
+      return
+    }
+
+    const gen = ++loadGen.current
+    const supabase = getBrowserSupabase()
+
+    ;(async () => {
+      try {
+        setBootstrapping(true)
+        setError('')
+        const { description, error: loadErr } = await fetchMissionById(
+          supabase,
+          missionId
+        )
+
+        if (gen !== loadGen.current) return
+
+        if (loadErr) {
+          setError(loadErr.message)
+          setInput('')
+          setResult({ actionPlan: [], risks: [], tools: [] })
+          setBootstrapping(false)
+          return
+        }
+
+        setInput(description ?? '')
+        setResult({ actionPlan: [], risks: [], tools: [] })
+        setBootstrapping(false)
+      } catch (err) {
+        if (gen !== loadGen.current) return
+        setError(err?.message || 'Failed to load mission')
+        setInput('')
+        setResult({ actionPlan: [], risks: [], tools: [] })
+        setBootstrapping(false)
+      }
+    })()
+  }, [missionId, resetMissionState])
+
+  const canSubmit =
+    input.trim().length > 0 && !loading && !bootstrapping
 
   async function onSubmit(e) {
     e.preventDefault()
-    if (loading) return
+    if (loading || bootstrapping) return
 
     const requestId = ++requestCounter
     latestRequestId = requestId
@@ -38,13 +105,7 @@ export function useMission() {
     setLoading(true)
 
     try {
-      const data = await analyzeMission(input)
-
-      if ('plan' in data) {
-        console.warn("[DEPRECATION] backend still sending legacy 'plan' field")
-      }
-
-      const normalized = normalizeResponse(data)
+      const normalized = await analyzeMissionNormalized(input)
 
       if (requestId !== latestRequestId) {
         console.debug('[analyze] stale response ignored', {
@@ -53,15 +114,6 @@ export function useMission() {
           arrivedAt: new Date().toISOString()
         })
         return
-      }
-
-      const isFullResponse =
-        Array.isArray(normalized.actionPlan) &&
-        Array.isArray(normalized.risks) &&
-        Array.isArray(normalized.tools)
-
-      if (!isFullResponse) {
-        throw new Error('Invalid API response: missing actionPlan')
       }
 
       console.debug('[analyze] response applied', {
@@ -91,6 +143,7 @@ export function useMission() {
     input,
     setInput,
     loading,
+    bootstrapping,
     error,
     result,
     canSubmit,

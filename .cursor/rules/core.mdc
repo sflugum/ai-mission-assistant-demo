@@ -2,7 +2,7 @@
 alwaysApply: true
 ---
 
-You are working in a rapid prototype environment.
+Always use 1-sentence bullet points for documentation and prioritize modular file structures.
 
 RULES:
 - Do NOT introduce unnecessary files

@@ -5,7 +5,7 @@ alwaysApply: true
 WORKFLOW:
 
 When implementing features:
-1. Do not refactor unless explicitly asked
+Do not refactor unless explicitly asked
 
 When modifying code:
 - Change ONLY what is requested

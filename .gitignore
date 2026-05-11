@@ -1,5 +1,13 @@
 node_modules/
+frontend/.port_config.json
 .env
+.env.test
 dist/
 .DS_Store
+
+test-results/
+playwright-report/
+blob-report/
+
+
 

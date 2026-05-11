@@ -1,3 +1,6 @@
+const btnAnalyzeBase =
+  'min-h-[44px] min-w-[44px] rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-md transition-all hover:brightness-110 active:scale-95 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface'
+
 export default function MissionInput({
   input,
   onInputChange,
@@ -6,27 +9,41 @@ export default function MissionInput({
   error,
   canSubmit
 }) {
+  /** Empty / bootstrapped: neutral cursor; disabled while analyzing: not-allowed. */
+  const analyzeCursor =
+    loading ? 'disabled:cursor-not-allowed' : 'disabled:cursor-default'
+
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
-      <label className="block">
-        <span className="text-sm font-medium text-slate-200">Mission input</span>
+    <form onSubmit={onSubmit} className="space-y-8">
+      <label className="block space-y-6" htmlFor="mission-input">
+        <span className="block font-sans text-sm font-semibold text-highlight">
+          Mission input
+        </span>
         <textarea
-          className="mt-2 w-full min-h-[120px] resize-y rounded-xl border border-slate-800 bg-slate-950/40 p-3 text-sm text-slate-100 outline-none focus:border-indigo-500"
+          id="mission-input"
+          autoComplete="off"
+          spellCheck="true"
+          className="w-full min-h-[140px] resize-y rounded-xl border border-slate-600 bg-black/40 p-6 font-sans text-base leading-relaxed text-slate-100 shadow-sm outline-none transition-all focus-visible:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
           value={input}
           onChange={(e) => onInputChange(e.target.value)}
+          placeholder="Paste or type your mission brief…"
         />
       </label>
 
-      <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
         <button
           type="submit"
           disabled={!canSubmit}
-          className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60 disabled:cursor-not-allowed"
+          className={`${btnAnalyzeBase} ${analyzeCursor}`}
         >
-          {loading ? 'Analyzing...' : 'Analyze'}
+          {loading ? 'Analyzing…' : 'Analyze'}
         </button>
 
-        {error ? <p className="text-sm text-red-300">{error}</p> : null}
+        {error ? (
+          <p className="flex-1 rounded-xl border border-slate-600 border-l-accent bg-black/70 p-6 font-sans text-sm font-medium leading-relaxed text-highlight shadow-sm sm:mt-0 sm:max-w-xl">
+            {error}
+          </p>
+        ) : null}
       </div>
     </form>
   )

@@ -1,0 +1,20 @@
+---
+alwaysApply: true
+---
+
+# Deployment Architecture
+- Frontend: Vercel (React.js/Vite)
+- Backend: Render (Node.js/Express)
+- Database: Supabase (Postgres)
+    - Development: Local Docker instance via Supabase CLI
+    - Production: Hosted Supabase Cloud (Postgres)
+
+# Networking Logic
+- Local Dev: Backend talks to Supabase via 'host.docker.internal:54322'
+- Production: Backend talks to Supabase via Connection String (Cloud URL)
+- CORS: Backend on Render must allow requests from the Vercel frontend URL.
+
+# Database Management
+- Use Supabase CLI for all migrations.
+- NEVER suggest 'Developing in Production'. 
+- All schema changes must be generated as migrations in the /supabase/migrations folder.

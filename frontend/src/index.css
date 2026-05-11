@@ -1,3 +1,34 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/**
+ * Accessibility baselines — WCAG 2.2-oriented (focus, motion, readability).
+ */
+
+@layer base {
+  html {
+    @apply motion-safe:scroll-smooth;
+  }
+
+  /* 2.3.3 Animation — respect OS reduce-motion */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /*
+   * 2.4.11 / 2.4.13 Focus appearance — accent is visible vs both light and dark regions.
+   * Components may add focus-visible:outline-none where they replace this with richer rings.
+   */
+  :where(a, button, summary, textarea, input, select, [role='button'], [role='tab']):focus-visible {
+    outline: 3px solid theme('colors.accent');
+    outline-offset: 3px;
+  }
+}

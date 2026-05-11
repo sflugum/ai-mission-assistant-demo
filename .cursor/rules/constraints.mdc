@@ -6,10 +6,15 @@ STRICT CONSTRAINTS:
 
 Ask before act
 
-- Stack is fixed:
+- Stack:
   - Frontend: React (Vite) + Tailwind
   - Backend: Node.js + Express
-  - Database: SQLite
+
+  # Tech Stack Standards
+- **Supabase:** Always reference `@supabase/ssr` or the latest client initialization found in `@Supabase` configs. Reject any `supabase-auth-helpers` patterns.
+- **Vite:** Follow the environment variable patterns and build logic defined in `@vite.config.ts`.
+- **Context Priority:** Always prioritize indexed file context over general training data. If a conflict exists, follow the local `@Codebase`.
+  
 
 - NEVER:
   - Introduce frameworks (Next.js, NestJS, etc.) unless asked
