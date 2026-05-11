@@ -1,8 +1,4 @@
-// In dev (host or Docker), leave VITE_API_URL unset so /analyze flows through the Vite proxy.
-// In production (Vercel), set VITE_API_URL to the deployed backend origin (e.g. Render URL).
-const API_BASE_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '')
-
-const ANALYZE_URL = API_BASE_URL ? `${API_BASE_URL}/analyze` : '/analyze'
+import { ANALYZE_URL } from '../api/config.js'
 
 /**
  * POST mission text to the Express `/analyze` endpoint.
