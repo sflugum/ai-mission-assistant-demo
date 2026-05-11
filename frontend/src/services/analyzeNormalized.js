@@ -1,5 +1,6 @@
 import { analyzeMission } from './aiService.js'
 
+/** Maps API JSON to the three lists the UI expects (warns if legacy `plan` appears). */
 export function normalizeAnalyzeResponse(data) {
   return {
     actionPlan: data.actionPlan,

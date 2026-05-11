@@ -7,6 +7,7 @@ import react from '@vitejs/plugin-react'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 function readBackendPortConfigBaseUrl() {
+  // Written by the local Express dev server when it picks a listen port (see backend `writeDevPortConfig`).
   const configPath = path.join(__dirname, '.port_config.json')
   try {
     const raw = fs.readFileSync(configPath, 'utf8')

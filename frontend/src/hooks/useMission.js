@@ -3,6 +3,7 @@ import { analyzeMissionNormalized } from '../services/analyzeNormalized.js'
 import { getBrowserSupabase } from '../lib/supabaseClient'
 import { fetchMissionById } from '../services/missions'
 
+// Module-level ids: ignore late responses if missionId or submit race changes mid-flight.
 let requestCounter = 0
 let latestRequestId = 0
 
@@ -17,21 +18,15 @@ function isValidMissionUuid(id) {
   return typeof id === 'string' && UUID_RE.test(id)
 }
 
-function normalizeResponse(data) {
-  return {
-    actionPlan: data.actionPlan,
-    risks: data.risks,
-    tools: data.tools
-  }
-}
-
+/**
+ * `/mission/new` starts empty; `/mission/:uuid` hydrates from Supabase. Analyze uses the same normalized shape as the landing quick-flow.
+ */
 export function useMission(missionId) {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [bootstrapping, setBootstrapping] = useState(() => !isNewMissionRoute(missionId))
   const [error, setError] = useState('')
   const [result, setResult] = useState({ actionPlan: [], risks: [], tools: [] })
-  const [activeStep, setActiveStep] = useState(0)
 
   const loadGen = useRef(0)
 
@@ -40,7 +35,6 @@ export function useMission(missionId) {
     setResult({ actionPlan: [], risks: [], tools: [] })
     setError('')
     setLoading(false)
-    setActiveStep(0)
   }, [])
 
   useEffect(() => {
@@ -61,28 +55,34 @@ export function useMission(missionId) {
     const supabase = getBrowserSupabase()
 
     ;(async () => {
-      setBootstrapping(true)
-      setError('')
-      const { description, error: loadErr } = await fetchMissionById(
-        supabase,
-        missionId
-      )
+      try {
+        setBootstrapping(true)
+        setError('')
+        const { description, error: loadErr } = await fetchMissionById(
+          supabase,
+          missionId
+        )
 
-      if (gen !== loadGen.current) return
+        if (gen !== loadGen.current) return
 
-      if (loadErr) {
-        setError(loadErr.message)
+        if (loadErr) {
+          setError(loadErr.message)
+          setInput('')
+          setResult({ actionPlan: [], risks: [], tools: [] })
+          setBootstrapping(false)
+          return
+        }
+
+        setInput(description ?? '')
+        setResult({ actionPlan: [], risks: [], tools: [] })
+        setBootstrapping(false)
+      } catch (err) {
+        if (gen !== loadGen.current) return
+        setError(err?.message || 'Failed to load mission')
         setInput('')
         setResult({ actionPlan: [], risks: [], tools: [] })
-        setActiveStep(0)
         setBootstrapping(false)
-        return
       }
-
-      setInput(description ?? '')
-      setResult({ actionPlan: [], risks: [], tools: [] })
-      setActiveStep(0)
-      setBootstrapping(false)
     })()
   }, [missionId, resetMissionState])
 

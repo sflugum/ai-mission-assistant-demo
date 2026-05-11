@@ -10,6 +10,7 @@ function buildTitle(input) {
   return `${input.slice(0, TITLE_MAX_LENGTH).trimEnd()}…`
 }
 
+/** POST /analyze — async errors flow to `errorMiddleware` via `asyncHandler` on the route. */
 export async function analyzeMission(req, res) {
   const input = req?.body?.input
   if (typeof input !== 'string' || input.trim().length === 0) {

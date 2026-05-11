@@ -8,6 +8,7 @@ export type SavedMissionRow = {
   lastActivityAt: string
 }
 
+/** Lists saved missions for the selector; prefers `updated_at` when the DB has that migration. */
 export async function fetchSavedMissions(client: SupabaseClient | null): Promise<{
   data: SavedMissionRow[]
   error: Error | null
@@ -36,6 +37,7 @@ export async function fetchSavedMissions(client: SupabaseClient | null): Promise
   }
 
   const msg = withUpdated.error?.message ?? ''
+  // Older DBs without `updated_at` return a column error — fall back so the UI still loads.
   if (/updated_at|schema cache/i.test(msg)) {
     const legacy = await client
       .from('missions')

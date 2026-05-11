@@ -65,7 +65,7 @@ function MissionWorkspacePageInner({ missionId }) {
   )
 }
 
-/** Remount on `missionId` change so local session state cannot bleed across missions. */
+/** Changing `:missionId` remounts inner state so two missions never share textarea / analyze results. */
 export default function MissionWorkspacePage() {
   const { missionId } = useParams()
   return <MissionWorkspacePageInner key={missionId} missionId={missionId} />

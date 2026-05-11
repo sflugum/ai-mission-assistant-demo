@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 
+/** Single service-role client per process — avoids extra handshakes on Render under load. */
 let cachedClient = null
 
 export function getSupabaseClient() {

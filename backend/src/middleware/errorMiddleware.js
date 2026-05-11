@@ -50,6 +50,7 @@ export function errorHandler(err, _req, res, _next) {
 
   const stack = isDev && typeof err?.stack === 'string' ? err.stack : ''
 
+  // In production, `stack` is omitted so clients never see server paths or internals.
   res.status(status).json({
     success: false,
     message,

@@ -12,6 +12,7 @@ import { writeDevPortConfig } from './src/utils/writeDevPortConfig.js'
 // Nodemon does not reload .env on change — restart the server after editing backend/.env.
 
 const app = express()
+// Comma-separated origins (e.g. Vercel preview + prod). Empty list: non-browser clients (no Origin header) still pass; browsers must match exactly.
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',').map((origin) => origin.trim()).filter(Boolean)
   : []
@@ -38,6 +39,7 @@ app.get('/health', (_req, res) => {
 
 app.use(missionRoutes)
 
+// Order matters: 404 runs only when no route matched; errorHandler is last.
 app.use(notFoundHandler)
 app.use(errorHandler)
 
@@ -105,7 +107,6 @@ async function startServer() {
 
       // eslint-disable-next-line no-console
       console.log('Using Gemini model:', process.env.GOOGLE_MODEL)
-      // eslint-disable-next-line no-console
       // eslint-disable-next-line no-console
       console.log(
         listenHost

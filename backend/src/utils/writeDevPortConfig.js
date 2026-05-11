@@ -3,6 +3,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+// Repo-relative path: backend/src/utils → frontend/.port_config.json (read by Vite `readBackendPortConfigBaseUrl`).
 const FRONTEND_PORT_CONFIG = path.resolve(__dirname, '../../../frontend/.port_config.json')
 
 /**

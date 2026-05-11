@@ -1,9 +1,8 @@
 import { ANALYZE_URL } from '../api/config.js'
 
 /**
- * POST mission text to the Express `/analyze` endpoint.
- * @param {string} input
- * @returns {Promise<object>}
+ * POST mission text to Express `/analyze`.
+ * URL comes from `../api/config.js` (relative in dev → Vite proxy; absolute when `VITE_API_URL` is set).
  */
 export async function analyzeMission(input) {
   const res = await fetch(ANALYZE_URL, {

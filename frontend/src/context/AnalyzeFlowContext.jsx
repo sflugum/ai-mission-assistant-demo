@@ -7,6 +7,10 @@ import {
 } from 'react'
 import { analyzeMissionNormalized } from '../services/analyzeNormalized.js'
 
+/**
+ * Holds landing → `/results` analyze state in one place so navigation does not re-hit `/analyze`.
+ * Request ids drop stale responses when the user submits twice quickly.
+ */
 const AnalyzeFlowContext = createContext(null)
 
 let requestSeq = 0
