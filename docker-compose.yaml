@@ -14,6 +14,14 @@
 # Run order:
 #   1. npx supabase start
 #   2. docker compose up
+#
+# If containers show missing modules or broken proxy to `backend:3001`, reset images & volumes:
+#   1. docker compose down -v
+#   2. docker compose build --no-cache
+#   3. docker compose up
+#
+# Bind mounts (`./backend` / `./frontend`) would replace `/app/node_modules` with the host folder
+# if not for anonymous volumes `- /app/node_modules`, which preserves Linux-built dependencies.
 
 services:
   backend:
@@ -28,6 +36,7 @@ services:
     environment:
       # Local-Docker overrides. Production values are set in Render's dashboard.
       PORT: 3001
+      LISTEN_HOST: "0.0.0.0"
       ALLOWED_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
       SUPABASE_URL: http://host.docker.internal:54321
       DATABASE_URL: postgresql://postgres:postgres@host.docker.internal:54322/postgres
@@ -35,13 +44,14 @@ services:
       - "host.docker.internal:host-gateway"
     volumes:
       - ./backend:/app
+      # Anonymous volume prevents host `./backend` bind from hiding container node_modules (avoids MODULE_NOT_FOUND / wrong arch binaries).
       - /app/node_modules
-    # Wait for the Supabase API to accept connections before starting nodemon.
-    # (The DB lives in the Supabase CLI's compose, so a `depends_on` isn't possible.)
     command: >
       sh -c "echo 'Waiting for Supabase API at host.docker.internal:54321...';
       until node -e \"fetch('http://host.docker.internal:54321/rest/v1/').then(()=>process.exit(0)).catch(()=>process.exit(1))\" 2>/dev/null; do sleep 2; done;
-      echo 'Supabase reachable. Starting backend.';
+      echo 'Supabase reachable. Syncing dependencies...';
+      npm install;
+      echo 'Starting backend.';
       npm run dev"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
@@ -59,11 +69,14 @@ services:
     ports:
       - "5173:5173"
     environment:
-      # Tells vite.config.js to proxy /analyze to the backend service over the compose network.
+      # Vite proxy target on the Compose network (see vite.config.js).
       VITE_PROXY_TARGET: http://backend:3001
     volumes:
       - ./frontend:/app
       - /app/node_modules
+    command: >
+      sh -c "npm install &&
+      npm run dev -- --host 0.0.0.0"
     depends_on:
       - backend
     restart: unless-stopped

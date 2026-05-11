@@ -4,7 +4,7 @@ import MissionInput from './MissionInput.jsx'
 import RequirementDisplay from './RequirementDisplay.jsx'
 import { useMission } from '../hooks/useMission.js'
 
-function MissionWorkspaceInner({ missionId }) {
+function MissionWorkspacePageInner({ missionId }) {
   const {
     input,
     setInput,
@@ -20,7 +20,7 @@ function MissionWorkspaceInner({ missionId }) {
     <div className="min-h-screen bg-black">
       <header className="border-b border-slate-800 bg-white">
         <div className="mx-auto max-w-7xl px-6 py-12 md:py-16">
-          <Header homeLink="/" />
+          <Header homeLink="/missions" />
         </div>
       </header>
 
@@ -66,7 +66,7 @@ function MissionWorkspaceInner({ missionId }) {
 }
 
 /** Remount on `missionId` change so local session state cannot bleed across missions. */
-export default function MissionWorkspace() {
+export default function MissionWorkspacePage() {
   const { missionId } = useParams()
-  return <MissionWorkspaceInner key={missionId} missionId={missionId} />
+  return <MissionWorkspacePageInner key={missionId} missionId={missionId} />
 }

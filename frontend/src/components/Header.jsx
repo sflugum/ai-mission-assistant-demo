@@ -3,12 +3,12 @@ import { Link } from 'react-router-dom'
 const linkBack =
   'mb-6 inline-block font-sans text-sm font-semibold text-primary transition-all hover:brightness-110 active:scale-95'
 
-export default function Header({ homeLink }) {
+export default function Header({ homeLink, backLabel = 'All missions' }) {
   return (
     <div className="space-y-6">
       {homeLink ? (
         <Link to={homeLink} className={linkBack}>
-          ← All missions
+          ← {backLabel}
         </Link>
       ) : null}
       <div className="space-y-6">

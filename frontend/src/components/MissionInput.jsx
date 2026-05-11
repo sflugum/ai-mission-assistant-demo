@@ -1,5 +1,5 @@
-const btnAnalyze =
-  'rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-md transition-all hover:brightness-110 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60'
+const btnAnalyzeBase =
+  'rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-md transition-all hover:brightness-110 active:scale-95 disabled:opacity-60'
 
 export default function MissionInput({
   input,
@@ -9,6 +9,10 @@ export default function MissionInput({
   error,
   canSubmit
 }) {
+  /** Empty / bootstrapped: neutral cursor; disabled while analyzing: not-allowed. */
+  const analyzeCursor =
+    loading ? 'disabled:cursor-not-allowed' : 'disabled:cursor-default'
+
   return (
     <form onSubmit={onSubmit} className="space-y-8">
       <label className="block space-y-6">
@@ -24,7 +28,11 @@ export default function MissionInput({
       </label>
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
-        <button type="submit" disabled={!canSubmit} className={btnAnalyze}>
+        <button
+          type="submit"
+          disabled={!canSubmit}
+          className={`${btnAnalyzeBase} ${analyzeCursor}`}
+        >
           {loading ? 'Analyzing…' : 'Analyze'}
         </button>
 

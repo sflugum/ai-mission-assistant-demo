@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { analyzeMission } from '../services/aiService.js'
+import { analyzeMissionNormalized } from '../services/analyzeNormalized.js'
 import { getBrowserSupabase } from '../lib/supabaseClient'
 import { fetchMissionById } from '../services/missions'
 
@@ -105,13 +105,7 @@ export function useMission(missionId) {
     setLoading(true)
 
     try {
-      const data = await analyzeMission(input)
-
-      if ('plan' in data) {
-        console.warn("[DEPRECATION] backend still sending legacy 'plan' field")
-      }
-
-      const normalized = normalizeResponse(data)
+      const normalized = await analyzeMissionNormalized(input)
 
       if (requestId !== latestRequestId) {
         console.debug('[analyze] stale response ignored', {
@@ -120,15 +114,6 @@ export function useMission(missionId) {
           arrivedAt: new Date().toISOString()
         })
         return
-      }
-
-      const isFullResponse =
-        Array.isArray(normalized.actionPlan) &&
-        Array.isArray(normalized.risks) &&
-        Array.isArray(normalized.tools)
-
-      if (!isFullResponse) {
-        throw new Error('Invalid API response: missing actionPlan')
       }
 
       console.debug('[analyze] response applied', {

@@ -58,11 +58,14 @@ function getInitialPort() {
 /**
  * @param {import('express').Express} expressApp
  * @param {number} listenPort
+ * @param {string | undefined} listenHost omit for Node default binding; use `0.0.0.0` in Docker so other containers reach this service.
  * @returns {Promise<import('http').Server>}
  */
-function listenOnPort(expressApp, listenPort) {
+function listenOnPort(expressApp, listenPort, listenHost) {
   return new Promise((resolve, reject) => {
-    const server = expressApp.listen(listenPort)
+    const server = listenHost
+      ? expressApp.listen(listenPort, listenHost)
+      : expressApp.listen(listenPort)
     const onError = (err) => {
       server.removeListener('listening', onListening)
       if (err.code === 'EADDRINUSE') {
@@ -82,13 +85,14 @@ function listenOnPort(expressApp, listenPort) {
 
 async function startServer() {
   const initialPort = getInitialPort()
+  const listenHost = process.env.LISTEN_HOST?.trim() || undefined
   let attemptPort = initialPort
   const maxPort = 65535
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
     try {
-      const server = await listenOnPort(app, attemptPort)
+      const server = await listenOnPort(app, attemptPort, listenHost)
 
       if (!isProduction) {
         try {
@@ -102,7 +106,12 @@ async function startServer() {
       // eslint-disable-next-line no-console
       console.log('Using Gemini model:', process.env.GOOGLE_MODEL)
       // eslint-disable-next-line no-console
-      console.log(`Server ready at http://localhost:${attemptPort}`)
+      // eslint-disable-next-line no-console
+      console.log(
+        listenHost
+          ? `Server ready at http://${listenHost}:${attemptPort}`
+          : `Server ready at http://localhost:${attemptPort}`
+      )
 
       if (!isProduction && attemptPort !== initialPort) {
         // eslint-disable-next-line no-console

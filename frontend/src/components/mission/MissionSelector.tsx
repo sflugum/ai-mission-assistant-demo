@@ -5,12 +5,12 @@ import {
   fetchSavedMissions,
   type SavedMissionRow
 } from '../../services/missions'
-
-const btnPrimary =
-  'inline-flex items-center justify-center rounded-xl bg-primary px-8 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:brightness-110 active:scale-95'
-
-const btnSecondaryHero =
-  'inline-flex items-center justify-center rounded-xl border-2 border-secondary px-8 py-3 text-sm font-semibold text-secondary shadow-sm transition-all hover:bg-secondary/10 active:scale-95'
+import {
+  heroBtnPrimaryClass,
+  heroBtnSecondaryClass,
+  MarketingHeroTagline,
+  MissionMarketingHero
+} from './MissionMarketingHero'
 
 const btnResumeCard =
   'inline-flex items-center justify-center rounded-xl border-2 border-primary bg-white px-4 py-2 text-sm font-semibold text-primary shadow-sm transition-all hover:bg-primary/10 active:scale-95'
@@ -65,36 +65,27 @@ export default function MissionSelector() {
 
   return (
     <div className="min-h-screen bg-black">
-      <section className="bg-white py-16 md:py-24">
-        <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-6 lg:grid-cols-2">
-          <div className="space-y-8">
-            <span className="font-heading text-sm font-bold uppercase tracking-widest text-primary">
-              Structured missions
-            </span>
-            <h1 className="font-heading text-4xl font-bold tracking-tight text-slate-900 md:text-5xl">
-              AI Mission Assistant
-            </h1>
-            <p className="font-sans text-xl leading-relaxed text-slate-600">
-              Turn rough drafts into clear action plans, risks, and tools—or
-              reopen saved analyses from below.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <button type="button" className={btnPrimary} onClick={() => navigate('/mission/new')}>
-                Start new mission
-              </button>
-              <button type="button" className={btnSecondaryHero} onClick={scrollToSaved}>
-                View saved missions
-              </button>
-            </div>
-          </div>
-
-          <div className="flex aspect-video w-full items-center justify-center rounded-2xl border border-slate-200 bg-surface p-6 shadow-inner lg:p-8">
-            <span className="text-center font-heading text-sm font-bold text-accent md:text-base">
-              Analysis pipeline
-            </span>
-          </div>
-        </div>
-      </section>
+      <MissionMarketingHero
+        description={<MarketingHeroTagline />}
+        actions={
+          <>
+            <button
+              type="button"
+              className={heroBtnPrimaryClass}
+              onClick={() => navigate('/mission/new')}
+            >
+              Start new mission
+            </button>
+            <button
+              type="button"
+              className={heroBtnSecondaryClass}
+              onClick={scrollToSaved}
+            >
+              View saved missions
+            </button>
+          </>
+        }
+      />
 
       <section id="saved-missions" className="bg-surface py-16 md:py-24">
         <div className="mx-auto max-w-7xl px-6">
