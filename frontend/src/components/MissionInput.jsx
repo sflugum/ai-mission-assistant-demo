@@ -1,5 +1,5 @@
 const btnAnalyzeBase =
-  'min-h-[44px] min-w-[44px] rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-md transition-all hover:brightness-110 active:scale-95 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface'
+  'min-h-[44px] min-w-[44px] rounded-xl bg-primary px-6 py-3 text-base font-semibold text-white shadow-md transition-colors hover:brightness-110 active:brightness-95 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface'
 
 export default function MissionInput({
   input,
@@ -16,8 +16,8 @@ export default function MissionInput({
   return (
     <form onSubmit={onSubmit} className="space-y-8">
       <label className="block space-y-6" htmlFor="mission-input">
-        <span className="block font-sans text-sm font-semibold text-highlight">
-          Mission input
+        <span className="block font-sans text-base font-bold text-highlight">
+          Mission Input
         </span>
         <textarea
           id="mission-input"

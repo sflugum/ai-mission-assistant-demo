@@ -5,10 +5,10 @@ const focusRingHero =
 
 /** ≥44px tall tap target (WCAG 2.2 target size advisories where applicable). */
 export const heroBtnPrimaryClass =
-  `inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl bg-primary px-8 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:brightness-110 active:scale-95 disabled:pointer-events-none disabled:opacity-60 ${focusRingHero}`
+  `inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl bg-primary px-8 py-3 text-base font-semibold text-white shadow-lg transition-colors hover:brightness-110 active:brightness-95 disabled:pointer-events-none disabled:opacity-60 ${focusRingHero}`
 
 export const heroBtnSecondaryClass =
-  `inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border-2 border-secondary px-8 py-3 text-sm font-semibold text-secondary shadow-sm transition-all hover:bg-secondary/10 active:scale-95 ${focusRingHero}`
+  `inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border-2 border-secondary px-8 py-3 text-base font-semibold text-secondary shadow-sm transition-colors hover:bg-secondary/10 active:brightness-95 ${focusRingHero}`
 
 /** Canonical hero tagline — used on `/` and `/missions` so both stay in sync. */
 export function MarketingHeroTagline() {
