@@ -20,13 +20,14 @@
 #   2. docker compose build --no-cache
 #   3. docker compose up
 #
-# Bind mounts (`./backend` / `./frontend`) would replace `/app/node_modules` with the host folder
-# if not for anonymous volumes `- /app/node_modules`, which preserves Linux-built dependencies.
+# Build context is the repo root so Docker sees root `package-lock.json` (npm workspaces).
+# Bind mounts align with WORKDIR `/repo`: hoisted deps stay under `/repo/node_modules`.
 
 services:
   backend:
     build:
-      context: ./backend
+      context: .
+      dockerfile: backend/Dockerfile
       target: dev
     container_name: ai-mission-backend
     ports:
@@ -43,16 +44,16 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
-      - ./backend:/app
-      # Anonymous volume prevents host `./backend` bind from hiding container node_modules (avoids MODULE_NOT_FOUND / wrong arch binaries).
-      - /app/node_modules
+      - ./backend:/repo/backend
+      - /repo/node_modules
+      - /repo/backend/node_modules
     command: >
       sh -c "echo 'Waiting for Supabase API at host.docker.internal:54321...';
       until node -e \"fetch('http://host.docker.internal:54321/rest/v1/').then(()=>process.exit(0)).catch(()=>process.exit(1))\" 2>/dev/null; do sleep 2; done;
       echo 'Supabase reachable. Syncing dependencies...';
-      npm install;
+      cd /repo && npm install;
       echo 'Starting backend.';
-      npm run dev"
+      npm run dev --workspace backend"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
       interval: 30s
@@ -63,7 +64,8 @@ services:
 
   frontend:
     build:
-      context: ./frontend
+      context: .
+      dockerfile: frontend/Dockerfile
       target: dev
     container_name: ai-mission-frontend
     ports:
@@ -72,11 +74,12 @@ services:
       # Vite proxy target on the Compose network (see vite.config.js).
       VITE_PROXY_TARGET: http://backend:3001
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
+      - ./frontend:/repo/frontend
+      - /repo/node_modules
+      - /repo/frontend/node_modules
     command: >
-      sh -c "npm install &&
-      npm run dev -- --host 0.0.0.0"
+      sh -c "cd /repo && npm install &&
+      npm run dev --workspace frontend -- --host 0.0.0.0"
     depends_on:
       - backend
     restart: unless-stopped

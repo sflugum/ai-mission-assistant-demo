@@ -1,23 +1,27 @@
-FROM node:22-alpine AS base
-WORKDIR /app
-COPY package*.json ./
+# Monorepo: build with context = repository root (`docker compose` / `docker build -f backend/Dockerfile .`).
+# Uses root package-lock.json + npm workspaces so hoisted deps resolve correctly.
 
-# Dev: explicit install inside the Linux image — never relies on host `node_modules`.
+FROM node:22-alpine AS base
+WORKDIR /repo
+COPY package.json package-lock.json ./
+COPY backend/package.json ./backend/
+COPY frontend/package.json ./frontend/
+
 FROM base AS dev
 RUN apk add --no-cache curl
-RUN npm install
-COPY . .
+RUN npm ci
+COPY backend ./backend
 EXPOSE 3001
-CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "dev", "--workspace", "backend"]
 
-# Production dependencies only (needs lockfile; add `backend/package-lock.json` if `npm ci` fails).
 FROM base AS prod-deps
-RUN npm ci --omit=dev
+RUN npm ci --omit=dev --workspace=backend
+COPY backend ./backend
 
 FROM node:22-alpine AS production
-WORKDIR /app
+WORKDIR /repo/backend
 ENV NODE_ENV=production
-COPY --from=prod-deps /app/node_modules ./node_modules
-COPY . .
+COPY --from=prod-deps /repo/node_modules /repo/node_modules
+COPY --from=prod-deps /repo/backend /repo/backend
 EXPOSE 3001
-CMD ["npm", "start"]
+CMD ["node", "server.js"]
