@@ -43,12 +43,6 @@ export default ({ mode }) => {
       }
     },
     envPrefix: ['VITE_'],
-    test: {
-      globals: true,
-      environment: 'jsdom',
-      include: ['src/**/*.{test,spec}.{js,jsx,ts,tsx}'],
-      passWithNoTests: true
-    },
     server: {
       port: 5173,
       strictPort: true,
