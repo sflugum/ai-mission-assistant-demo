@@ -21,19 +21,29 @@ export async function analyzeMission(req, res) {
   const analysis = await generateAnalysisWithGemini(trimmedInput)
   validateAIResponse(analysis)
 
-  const supabase = getSupabaseClient()
-  // PostgREST / supabase-js builders send parameterized requests (no string-built SQL).
-  const { data: mission, error: dbError } = await supabase
-    .from('missions')
-    .insert({
-      title: buildTitle(trimmedInput),
-      description: trimmedInput
-    })
-    .select('id')
-    .single()
+  let mission
+  try {
+    const supabase = getSupabaseClient()
+    // PostgREST / supabase-js builders send parameterized requests (no string-built SQL).
+    const { data, error: dbError } = await supabase
+      .from('missions')
+      .insert({
+        title: buildTitle(trimmedInput),
+        description: trimmedInput
+      })
+      .select('id')
+      .single()
 
-  if (dbError) {
-    throw new Error(`Failed to persist mission: ${dbError.message}`)
+    if (dbError) {
+      throw new HttpError(502, `Failed to persist mission: ${dbError.message}`)
+    }
+    mission = data
+  } catch (err) {
+    if (err instanceof HttpError) throw err
+    throw new HttpError(
+      503,
+      'Database request failed. If this persists, verify SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.'
+    )
   }
 
   return res.json({ missionId: mission.id, ...analysis })
