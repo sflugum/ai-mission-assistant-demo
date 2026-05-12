@@ -5,20 +5,20 @@
 export default function DemoDisclaimer() {
   return (
     <aside
-      className="fixed bottom-0 left-0 right-0 z-[100] border-t border-slate-700/60 bg-surface px-4 py-3 sm:px-6 md:py-3.5"
+      className="fixed bottom-0 left-0 right-0 z-[100] border-t border-slate-700 bg-surface px-4 py-4 sm:px-6 md:py-4 antialiased"
       role="note"
       aria-label="Demonstration disclaimer"
     >
-      <div className="mx-auto max-w-4xl max-h-[30vh] overflow-y-auto border-l-[3px] border-accent pl-4 sm:max-h-[28vh] md:max-h-none md:pl-5">
+      <div className="mx-auto max-w-4xl max-h-[16rem] overflow-y-auto border-l-[3px] border-accent pl-4 md:max-h-none md:pl-5">
         <p className="font-heading text-sm font-bold uppercase tracking-wide text-highlight sm:text-base">
           IMPORTANT: DEMONSTRATION ONLY
         </p>
-        <p className="mt-2 font-sans text-sm font-normal leading-relaxed text-slate-200 sm:text-[15px] sm:leading-relaxed md:leading-snug">
+        <p className="mt-2 font-sans text-sm font-normal leading-relaxed text-slate-200 sm:text-sm md:text-base md:leading-relaxed">
           This application is a technical portfolio exhibit. All action plans, risk
           assessments, and recommendations are simulated outputs and do{' '}
-          <strong className="font-bold">NOT</strong> constitute
+          <strong className="font-bold -webkit-font-smoothing: antialiased">NOT</strong> constitute
           professional advice. Use of this tool for actual operational planning is{' '}
-          <strong className="font-bold">strictly prohibited</strong>.
+          <strong className="font-bold -webkit-font-smoothing: antialiased">strictly prohibited</strong>.
           The developer accepts no legal liability for consequences arising from the use
           or misuse of this demonstration.
         </p>

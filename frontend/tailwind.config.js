@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config}
- * Tokens: surface #181818, primary #4aae8c, secondary #f75256, accent #fed734, highlight #fff.
+ * Tokens: surface #181818, primary #4aae8c, secondary #f75256, accent #fed734, highlight #ffffff.
  */
 export default {
   content: ['./index.html', './src/**/*.{js,jsx,ts,tsx}'],

@@ -7,7 +7,7 @@ function Fallback({ resetErrorBoundary }) {
       <button
         type="button"
         onClick={resetErrorBoundary}
-        className="rounded-md bg-slate-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-500"
+        className="rounded-md bg-slate-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-600 outline-none focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-slate-300"
       >
         Try Again
       </button>

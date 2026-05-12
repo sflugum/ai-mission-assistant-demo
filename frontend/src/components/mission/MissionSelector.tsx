@@ -14,10 +14,10 @@ import {
 } from './MissionMarketingHero'
 
 const btnResumeCard =
-  'inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border-2 border-primary bg-white px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10 active:bg-primary/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white'
+  'inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border-2 border-primary bg-white px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10 active:bg-primary/15 outline-none focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-accent focus-visible:outline-offset-[3px]'
 
 const btnDeleteCard =
-  'inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border-2 border-secondary bg-white px-4 py-2 text-sm font-semibold text-secondary transition-colors hover:bg-secondary/10 active:bg-secondary/15 disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white'
+  'inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border-2 border-secondary bg-white px-4 py-2 text-sm font-semibold text-secondary transition-colors hover:bg-secondary/10 active:bg-secondary/15 disabled:pointer-events-none disabled:opacity-50 outline-none focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-accent focus-visible:outline-offset-[3px]'
 
 function formatUpdatedAt(iso: string): string {
   try {

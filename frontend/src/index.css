@@ -8,7 +8,7 @@
 
 @layer base {
   html {
-    @apply motion-safe:scroll-smooth;
+    @apply motion-safe:scroll-smooth; 
   }
 
   /* 2.3.3 Animation — respect OS reduce-motion */

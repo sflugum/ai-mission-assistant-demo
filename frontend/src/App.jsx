@@ -13,11 +13,11 @@ export default function App() {
       {/* Skip link targets `#main-content` on each page shell (see LandingPage, ResultsPage, etc.). */}
       <a
         href="#main-content"
-        className="pointer-events-none fixed left-6 top-0 z-[200] block -translate-y-full rounded-lg bg-highlight px-4 py-3 font-sans text-sm font-semibold text-surface opacity-0 ring-2 ring-accent transition-transform transition-opacity motion-reduce:transition-none focus:pointer-events-auto focus:translate-y-4 focus:opacity-100 focus:outline-none focus-visible:outline-none"
+        className="sr-only focus:not-sr-only focus:pointer-events-auto focus:fixed focus:left-6 focus:top-4 focus:z-[200] focus:block focus:rounded-lg focus:bg-highlight focus:px-4 focus:py-3 focus:font-sans focus:text-sm focus:font-semibold focus:text-surface focus:ring-2 focus:ring-accent focus:ring-offset-2 antialiased"
       >
         Skip to main content
       </a>
-      <div className="min-h-screen pb-[13rem] sm:pb-48 md:pb-44">
+      <div className="relative min-h-screen pb-52 sm:pb-48 md:pb-44">
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/results" element={<ResultsPage />} />
