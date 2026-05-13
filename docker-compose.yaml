@@ -39,8 +39,8 @@ services:
       PORT: 3001
       LISTEN_HOST: "0.0.0.0"
       ALLOWED_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
-      SUPABASE_URL: http://host.docker.internal:54321
-      DATABASE_URL: postgresql://postgres:postgres@host.docker.internal:54322/postgres
+      SUPABASE_URL: https://nzbcsruutdgtwkugmktt.supabase.co
+      DATABASE_URL: postgresql://postgres.nzbcsruutdgtwkugmktt:Hu16iIStuMZhVVI7@aws-1-us-east-2.pooler.supabase.com:6543/postgres
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
