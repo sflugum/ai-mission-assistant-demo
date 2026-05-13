@@ -11,7 +11,7 @@ This project documents my process of building a full-stack AI application with a
 
 | Original Build: | Current Build: |
 | --------------- | -------------- |
-| <p align="center"><img width="50%" alt="ai-mission-demo" src="https://github.com/user-attachments/assets/05bb73ed-18c7-4895-b254-e5ec998e7c9f" /></p> | <p align="center"><img width="50%" alt="ai-mission-browser-screenshot" src="https://github.com/user-attachments/assets/971c2921-49ce-42d4-8c57-18cf9029f3d7" /></p> |
+| <p align="center"><img width="100%" alt="ai-mission-demo" src="https://github.com/user-attachments/assets/e4820582-c538-49de-aef6-0aea57470382" /></p> | <p align="center"><img width="100%" alt="ai-mission-browser-screenshot" src="https://github.com/user-attachments/assets/2aac3f0c-9f01-4274-9667-b9fa7ef794e8" /></p> |
 
 ---
 
