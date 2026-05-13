@@ -45,6 +45,9 @@ jobs:
 
       - name: Build frontend
         run: npm run build
+        env:
+          VITE_SUPABASE_URL: https://nzbcsruutdgtwkugmktt.supabase.co
+          VITE_SUPABASE_ANON_KEY: sb_publishable_XnkWn46V8M-tBvcrd_cpUA_nvbvlvA6
 
       - name: Upload Playwright report
         if: always()

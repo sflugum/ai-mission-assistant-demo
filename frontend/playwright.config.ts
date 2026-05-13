@@ -35,8 +35,8 @@ export default defineConfig({
 
     env: {
       /** Deterministic missions list during E2E (no flaky loading / staging data). */
-      VITE_SUPABASE_URL: '',
-      VITE_SUPABASE_ANON_KEY: '',
+      VITE_SUPABASE_URL: 'https://nzbcsruutdgtwkugmktt.supabase.co',
+      VITE_SUPABASE_ANON_KEY: 'sb_publishable_XnkWn46V8M-tBvcrd_cpUA_nvbvlvA6',
       VITE_API_URL: ''
     }
   }
