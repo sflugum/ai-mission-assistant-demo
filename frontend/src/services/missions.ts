@@ -14,9 +14,6 @@ export async function fetchSavedMissions(client: SupabaseClient | null): Promise
   error: Error | null
 }> {
 
-  // Debug: UI not showing saved missions, Supabase shows saved
-  console.log("1. fetchSavedMissions called. Client exists?", !!client);
-
   if (!client) {
     return { data: [], error: null };
   }
@@ -25,10 +22,6 @@ export async function fetchSavedMissions(client: SupabaseClient | null): Promise
     .from('missions')
     .select('id, title, status, updated_at')
     .order('updated_at', { ascending: false });
-
-  // Debug: UI not showing saved missions, Supabase shows saved
-  console.log("2. Supabase raw data:", withUpdated.data);
-  console.log("3. Supabase raw error:", withUpdated.error);
 
   if (!withUpdated.error) {
     return {
