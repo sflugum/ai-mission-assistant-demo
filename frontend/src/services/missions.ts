@@ -13,14 +13,15 @@ export async function fetchSavedMissions(client: SupabaseClient | null): Promise
   data: SavedMissionRow[]
   error: Error | null
 }> {
+
   if (!client) {
-    return { data: [], error: null }
+    return { data: [], error: null };
   }
 
   const withUpdated = await client
     .from('missions')
     .select('id, title, status, updated_at')
-    .order('updated_at', { ascending: false })
+    .order('updated_at', { ascending: false });
 
   if (!withUpdated.error) {
     return {

@@ -26,11 +26,22 @@ function readBackendPortConfigBaseUrl() {
 
 /** @param {unknown} mode */
 export default ({ mode }) => {
-  loadEnv(mode, '.', '')
+  const env = loadEnv(mode, process.cwd(), '');
+
+  const requiredEnvs = ['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY'];
+  for (const key of requiredEnvs) {
+    if (!env[key]) {
+      throw new Error(
+        `\n\n BUILD FAILURE: Missing environment variable ${key}\n` +
+        `Ensure this key is added to your Vercel Project Settings. \n`
+      );
+    }
+  }
+
   const fromPortFile = readBackendPortConfigBaseUrl()
-  // VITE_PROXY_TARGET wins (e.g. Docker: http://backend:3001). Else optional frontend/.port_config.json from the backend dev server.
-  const proxyTarget = process.env.VITE_PROXY_TARGET || fromPortFile || 'http://localhost:3001'
-  if (!process.env.VITE_PROXY_TARGET && fromPortFile) {
+  // Use env[key] or process.env[key] (Vercel populates process.env)
+  const proxyTarget = env.VITE_PROXY_TARGET || fromPortFile || 'http://localhost:3001'
+  if (!env.VITE_PROXY_TARGET && fromPortFile) {
     // eslint-disable-next-line no-console
     console.info(`[vite] /analyze proxy → ${fromPortFile} (from .port_config.json)`)
   }
