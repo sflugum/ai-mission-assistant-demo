@@ -1,10 +1,13 @@
-import { useParams } from 'react-router-dom'
+import { useEffect } from 'react'
+import { useParams, useLocation, useNavigate } from 'react-router-dom'
 import Header from './Header.jsx'
 import MissionInput from './MissionInput.jsx'
 import RequirementDisplay from './RequirementDisplay.jsx'
 import { useMission } from '../hooks/useMission.js'
 
 function MissionWorkspacePageInner({ missionId }) {
+  const location = useLocation()
+  const navigate = useNavigate()
   const {
     input,
     setInput,
@@ -16,6 +19,25 @@ function MissionWorkspacePageInner({ missionId }) {
     onSubmit
   } = useMission(missionId)
 
+  useEffect(() => {
+    const state = location.state
+    if (
+      !state ||
+      typeof state !== 'object' ||
+      !('focusWorkspace' in state) ||
+      !state.focusWorkspace
+    ) {
+      return
+    }
+
+    document.getElementById('mission-workspace')?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    })
+
+    navigate('.', { replace: true, state: {} })
+  }, [location.state, navigate])
+
   return (
     <div className="min-h-screen bg-black">
       <header className="border-b border-slate-800 bg-white">
@@ -25,9 +47,26 @@ function MissionWorkspacePageInner({ missionId }) {
       </header>
 
       <main id="main-content" tabIndex={-1} className="bg-surface py-16 outline-none md:py-24">
-        <div className="mx-auto max-w-7xl px-6">
+        <div id="mission-workspace" className="mx-auto max-w-7xl px-6">
           {bootstrapping ? (
-            <p className="font-sans text-slate-400">Loading mission…</p>
+            <div
+              role="status"
+              aria-live="polite"
+              className="flex flex-col items-center gap-6 rounded-xl border border-slate-700 bg-[#151515] p-8 md:flex-row md:items-start md:gap-8 md:p-10"
+            >
+              <div
+                className="h-10 w-10 shrink-0 rounded-full border-2 border-slate-600 border-t-accent animate-spin"
+                aria-hidden="true"
+              />
+              <div className="space-y-3 text-center md:text-left">
+                <p className="font-heading text-lg font-semibold text-highlight md:text-xl">
+                  Loading mission
+                </p>
+                <p className="font-sans text-sm leading-relaxed text-slate-300 md:text-base">
+                  This demo may take a few extra seconds after idle while connections wake up—hang tight.
+                </p>
+              </div>
+            </div>
           ) : (
             <div className="space-y-12 md:space-y-16">
               <div className="mx-auto max-w-3xl space-y-8">
