@@ -29,7 +29,7 @@ services:
       context: .
       dockerfile: backend/Dockerfile
       target: dev
-    container_name: ai-mission-backend
+    container_name: ai-mission-assistant-demo-backend
     ports:
       - "3001:3001"
     env_file:
@@ -38,8 +38,11 @@ services:
       # Local-Docker overrides. Production values are set in Render's dashboard.
       PORT: 3001
       LISTEN_HOST: "0.0.0.0"
+      # Browser Origin is always the host URL (localhost:5173), not a container hostname.
       ALLOWED_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
+      # Reach host Supabase CLI from inside the backend container (not localhost).
       SUPABASE_URL: http://host.docker.internal:54321
+      SUPABASE_SERVICE_ROLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU
       DATABASE_URL: postgresql://postgres:postgres@host.docker.internal:54322/postgres
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -48,18 +51,28 @@ services:
       - /repo/node_modules
       - /repo/backend/node_modules
     command: >
-      sh -c "echo 'Waiting for Supabase API at host.docker.internal:54321...';
-      until node -e \"fetch('http://host.docker.internal:54321/rest/v1/').then(()=>process.exit(0)).catch(()=>process.exit(1))\" 2>/dev/null; do sleep 2; done;
-      echo 'Supabase reachable. Syncing dependencies...';
+      sh -c "echo 'Waiting for Supabase API at host.docker.internal:54321 (max 120s)...';
+      i=0;
+      until node -e \"fetch('http://host.docker.internal:54321/rest/v1/').then(()=>process.exit(0)).catch(()=>process.exit(1))\" 2>/dev/null; do
+        i=$$((i+1));
+        if [ $$i -ge 60 ]; then
+          echo 'WARN: Supabase not reachable. Starting backend anyway (/analyze works; mission DB routes need npx supabase start).';
+          break;
+        fi;
+        sleep 2;
+      done;
+      echo 'Syncing dependencies...';
       cd /repo && npm install;
       echo 'Starting backend.';
       npm run dev --workspace backend"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 120s
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:3001/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 180s
+    networks:
+      - app
     restart: unless-stopped
 
   frontend:
@@ -67,12 +80,17 @@ services:
       context: .
       dockerfile: frontend/Dockerfile
       target: dev
-    container_name: ai-mission-frontend
+    container_name: ai-mission-assistant-demo-frontend
     ports:
       - "5173:5173"
+    env_file:
+      - ./frontend/.env
     environment:
-      # Vite proxy target on the Compose network (see vite.config.js).
+      # Vite dev proxy: use Compose service DNS (backend), never localhost inside this container.
       VITE_PROXY_TARGET: http://backend:3001
+      # Browser Supabase client must match the DB the backend writes to (local CLI, not production .env).
+      VITE_SUPABASE_URL: http://127.0.0.1:54321
+      VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
     volumes:
       - ./frontend:/repo/frontend
       - /repo/node_modules
@@ -81,16 +99,25 @@ services:
       sh -c "cd /repo && npm install &&
       npm run dev --workspace frontend -- --host 0.0.0.0"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+    networks:
+      - app
     restart: unless-stopped
 
   vector:
     image: timberio/vector:0.34.2-debian
-    container_name: ai-mission-vector
+    container_name: ai-mission-assistant-demo-vector
     user: root
     environment:
       DOCKER_HOST: unix:///var/run/docker.sock
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./vector.yaml:/etc/vector/vector.yaml:ro
+    networks:
+      - app
     restart: unless-stopped
+
+networks:
+  app:
+    driver: bridge

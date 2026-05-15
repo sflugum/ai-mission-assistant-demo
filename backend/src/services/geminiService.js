@@ -99,26 +99,13 @@ export async function generateAnalysisWithGemini(input) {
   const firstRawResponse = await callGemini(apiKey, model, primaryPrompt)
   try {
     return parseAndValidateRaw(firstRawResponse)
-  } catch (firstAttemptError) {
-    console.warn(
-      '[AI VALIDATION FAILED] First attempt failed:',
-      firstAttemptError?.message || firstAttemptError
-    )
-    console.warn('[AI VALIDATION FAILED] Retrying once...')
-
+  } catch {
     const repairPrompt = buildRepairPrompt(input, firstRawResponse)
     const retryRawResponse = await callGemini(apiKey, model, repairPrompt)
-    console.warn('[AI RETRY RESULT]', retryRawResponse)
 
     try {
-      const repaired = parseAndValidateRaw(retryRawResponse)
-      console.warn('[AI RETRY RESULT] Success')
-      return repaired
-    } catch (retryError) {
-      console.warn(
-        '[AI RETRY RESULT] Failed:',
-        retryError?.message || retryError
-      )
+      return parseAndValidateRaw(retryRawResponse)
+    } catch {
       const finalError = new Error('AI response failed validation after retry')
       finalError.code = 'AI_VALIDATION_RETRY_FAILED'
       throw finalError

@@ -30,7 +30,7 @@ export default ({ mode }) => {
 
   const requiredEnvs = ['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY'];
   for (const key of requiredEnvs) {
-    if (!env[key]) {
+    if (!(process.env[key] || env[key])) {
       throw new Error(
         `\n\n BUILD FAILURE: Missing environment variable ${key}\n` +
         `Ensure this key is added to your Vercel Project Settings. \n`
@@ -38,12 +38,39 @@ export default ({ mode }) => {
     }
   }
 
-  const fromPortFile = readBackendPortConfigBaseUrl()
-  // Use env[key] or process.env[key] (Vercel populates process.env)
-  const proxyTarget = env.VITE_PROXY_TARGET || fromPortFile || 'http://localhost:3001'
-  if (!env.VITE_PROXY_TARGET && fromPortFile) {
+  // process.env wins (Docker Compose `environment:`); loadEnv reads frontend/.env on disk.
+  const envProxyTarget = (
+    process.env.VITE_PROXY_TARGET ||
+    env.VITE_PROXY_TARGET ||
+    ''
+  ).trim()
+  const initialProxyTarget =
+    envProxyTarget || readBackendPortConfigBaseUrl() || 'http://localhost:3001'
+
+  /** Re-read port file each request so a backend port change does not require restarting Vite. */
+  function resolveProxyTarget() {
+    if (envProxyTarget) return envProxyTarget
+    return readBackendPortConfigBaseUrl() || 'http://localhost:3001'
+  }
+
+  if (!envProxyTarget) {
+    const fromFile = readBackendPortConfigBaseUrl()
+    if (fromFile) {
+      // eslint-disable-next-line no-console
+      console.info(`[vite] API proxy → ${fromFile} (from .port_config.json; refreshed per request)`)
+    } else {
+      // eslint-disable-next-line no-console
+      console.info(`[vite] API proxy → ${initialProxyTarget} (default; start the backend to avoid 502)`)
+    }
+  } else {
     // eslint-disable-next-line no-console
-    console.info(`[vite] /analyze proxy → ${fromPortFile} (from .port_config.json)`)
+    console.info(`[vite] API proxy → ${envProxyTarget} (VITE_PROXY_TARGET)`)
+  }
+
+  const apiProxy = {
+    target: initialProxyTarget,
+    changeOrigin: true,
+    router: () => resolveProxyTarget()
   }
 
   return defineConfig({
@@ -60,10 +87,8 @@ export default ({ mode }) => {
 
       // Development convenience: avoid CORS by proxying to the Express backend.
       proxy: {
-        '/analyze': {
-          target: proxyTarget,
-          changeOrigin: true
-        }
+        '/analyze': apiProxy,
+        '/missions': apiProxy
       }
     }
   })

@@ -14,7 +14,11 @@ export async function analyzeMission(input) {
   if (!res.ok) {
     const text = await res.text().catch(() => '')
     let message = `Request failed: ${res.status}`
-    if (text) {
+    if (res.status === 502) {
+      message =
+        'Cannot reach the API server (502). Start the backend (e.g. `npm run dev` in backend/ or `docker compose up`), then retry. If the backend bound to a different port, restart Vite after it writes frontend/.port_config.json.'
+    }
+    if (text && res.status !== 502) {
       try {
         const body = JSON.parse(text)
         if (body && typeof body.message === 'string' && body.message.length > 0) {

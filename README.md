@@ -127,3 +127,4 @@ docker-compose up --build
    * See comments inside each file for local vs. production configuration
    * Required: `GOOGLE_API_KEY`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
    * Optional: `PORT`, `CORS_ORIGIN`, `VITE_API_URL` (see comments for defaults)
+4. **Database migrations**: Run Supabase migrations against the same database your backend uses (for example `supabase db push` for local, or apply migration files in `supabase/migrations` to hosted Postgres). Saving missions requires the `public.mission_lines` table from `20260514120000_mission_lines.sql`.
