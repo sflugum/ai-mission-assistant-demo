@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { getBrowserSupabase } from '../../lib/supabaseClient'
 import {
   deleteSavedMission,
@@ -32,8 +32,11 @@ function formatUpdatedAt(iso: string): string {
   }
 }
 
+type MissionsLocationState = { focusSaved?: boolean }
+
 export default function MissionSelector() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [missions, setMissions] = useState<SavedMissionRow[]>([])
   const [listLoading, setListLoading] = useState(true)
   const [listError, setListError] = useState<string | null>(null)
@@ -63,9 +66,22 @@ export default function MissionSelector() {
     }
   }, [])
 
+  useEffect(() => {
+    const state = location.state as MissionsLocationState | null
+    if (!state?.focusSaved) return
+
+    document.getElementById('saved-missions')?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    })
+
+    navigate('.', { replace: true, state: {} })
+  }, [location.state, navigate])
+
   function scrollToSaved() {
     document.getElementById('saved-missions')?.scrollIntoView({
-      behavior: 'smooth'
+      behavior: 'smooth',
+      block: 'start'
     })
   }
 
@@ -98,7 +114,9 @@ export default function MissionSelector() {
             <button
               type="button"
               className={heroBtnPrimaryClass}
-              onClick={() => navigate('/mission/new')}
+              onClick={() =>
+                navigate('/mission/new', { state: { focusWorkspace: true } })
+              }
             >
               Start new mission
             </button>
@@ -132,7 +150,24 @@ export default function MissionSelector() {
             ) : null}
 
             {listLoading ? (
-              <p className="font-sans text-slate-400">Loading missions…</p>
+              <div
+                role="status"
+                aria-live="polite"
+                className="flex flex-col items-center gap-6 rounded-xl border border-slate-700 bg-[#151515] p-8 md:flex-row md:items-start md:gap-8 md:p-10"
+              >
+                <div
+                  className="h-10 w-10 shrink-0 rounded-full border-2 border-slate-600 border-t-accent animate-spin"
+                  aria-hidden="true"
+                />
+                <div className="space-y-3 text-center md:text-left">
+                  <p className="font-heading text-lg font-semibold text-highlight md:text-xl">
+                    Loading saved missions
+                  </p>
+                  <p className="font-sans text-sm leading-relaxed text-slate-300 md:text-base">
+                    This demo may take a few extra seconds after idle while connections wake up—hang tight.
+                  </p>
+                </div>
+              </div>
             ) : listError ? (
               <p className="rounded-xl border border-secondary/40 bg-[#0d0d0d] p-6 font-sans text-secondary md:p-8">
                 {listError}

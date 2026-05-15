@@ -27,7 +27,7 @@ export default function LandingPage() {
 
   function onStartFreshMission() {
     resetSession()
-    navigate('/mission/new')
+    navigate('/mission/new', { state: { focusWorkspace: true } })
   }
 
   return (
@@ -45,6 +45,7 @@ export default function LandingPage() {
             </button>
             <Link
               to="/missions"
+              state={{ focusSaved: true }}
               className={`${heroBtnSecondaryClass} cursor-pointer text-center`}
             >
               View saved missions
