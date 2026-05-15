@@ -115,15 +115,23 @@ Planned updates focus on building system reliability, persistence, and multi-use
 
 ```bash
 git clone https://github.com/sflugum/ai-mission-assistant-demo
-docker-compose up --build
+cd ai-mission-assistant-demo
+cp .env.example .env
+# Fill .env from: npx supabase status -o env
+npx supabase start
+docker compose up --build
 ```
 
-### Manual Installation
+Docker uses the **repo-root** `.env` only (not `backend/.env` or `frontend/.env`).
+
+### Manual Installation (host `npm run dev`)
 
 1. **Backend**: `cd backend && npm install && npm start`
 2. **Frontend**: `cd frontend && npm install && npm run dev`
 3. **Environment Variables**:
-   * Copy `.env.example` to `.env` in both `/frontend` and `/backend`
-   * See comments inside each file for local vs. production configuration
-   * Required: `GOOGLE_API_KEY`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
-   * Optional: `PORT`, `CORS_ORIGIN`, `VITE_API_URL` (see comments for defaults)
+   * Copy `backend/.env.example` → `backend/.env` and `frontend/.env.example` → `frontend/.env`
+   * Do not use the repo-root `.env` for host dev unless you symlink intentionally
+   * Backend (no `VITE_` prefix): `GOOGLE_API_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`
+   * Frontend (browser): `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`; optional `VITE_API_URL`
+   * `VITE_SUPABASE_*` must point at the same Supabase project the backend writes to
+4. **Database migrations**: Run Supabase migrations against the same database your backend uses (for example `supabase db push` for local, or apply migration files in `supabase/migrations` to hosted Postgres). Saving missions requires the `public.mission_lines` table from `20260514120000_mission_lines.sql`.

@@ -21,6 +21,6 @@ Ask before act
   - Add authentication unless asked
   - Add testing frameworks unless asked
   - Add Docker unless asked
-
+  
 - If unclear:
   → choose the simplest possible implementation

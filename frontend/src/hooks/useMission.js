@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { analyzeMissionNormalized } from '../services/analyzeNormalized.js'
 import { getBrowserSupabase } from '../lib/supabaseClient'
 import { fetchMissionById } from '../services/missions'
@@ -14,19 +15,28 @@ function isNewMissionRoute(missionId) {
   return !missionId || missionId === 'new'
 }
 
-function isValidMissionUuid(id) {
+export function isValidMissionUuid(id) {
   return typeof id === 'string' && UUID_RE.test(id)
+}
+
+function hasAnalysisRows(normalized) {
+  const a = normalized?.actionPlan?.length ?? 0
+  const r = normalized?.risks?.length ?? 0
+  const t = normalized?.tools?.length ?? 0
+  return a + r + t > 0
 }
 
 /**
  * `/mission/new` starts empty; `/mission/:uuid` hydrates from Supabase. Analyze uses the same normalized shape as the landing quick-flow.
  */
 export function useMission(missionId) {
+  const location = useLocation()
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [bootstrapping, setBootstrapping] = useState(() => !isNewMissionRoute(missionId))
   const [error, setError] = useState('')
   const [result, setResult] = useState({ actionPlan: [], risks: [], tools: [] })
+  const [showSaveOffer, setShowSaveOffer] = useState(false)
 
   const loadGen = useRef(0)
 
@@ -35,6 +45,15 @@ export function useMission(missionId) {
     setResult({ actionPlan: [], risks: [], tools: [] })
     setError('')
     setLoading(false)
+    setShowSaveOffer(false)
+  }, [])
+
+  const dismissSaveOffer = useCallback(() => {
+    setShowSaveOffer(false)
+  }, [])
+
+  const acknowledgeSaveComplete = useCallback(() => {
+    setShowSaveOffer(false)
   }, [])
 
   useEffect(() => {
@@ -54,37 +73,55 @@ export function useMission(missionId) {
     const gen = ++loadGen.current
     const supabase = getBrowserSupabase()
 
+    const snapshot = location.state?.savedSnapshot
+    if (
+      snapshot &&
+      typeof snapshot === 'object' &&
+      typeof snapshot.description === 'string'
+    ) {
+      setInput(snapshot.description)
+      setResult({
+        actionPlan: snapshot.actionPlan ?? [],
+        risks: snapshot.risks ?? [],
+        tools: snapshot.tools ?? []
+      })
+    }
+
     ;(async () => {
       try {
         setBootstrapping(true)
         setError('')
-        const { description, error: loadErr } = await fetchMissionById(
-          supabase,
-          missionId
-        )
+        const detail = await fetchMissionById(supabase, missionId)
 
         if (gen !== loadGen.current) return
 
-        if (loadErr) {
-          setError(loadErr.message)
+        if (detail.error) {
+          setError(detail.error.message)
           setInput('')
           setResult({ actionPlan: [], risks: [], tools: [] })
+          setShowSaveOffer(false)
           setBootstrapping(false)
           return
         }
 
-        setInput(description ?? '')
-        setResult({ actionPlan: [], risks: [], tools: [] })
+        setInput(detail.description ?? '')
+        setResult({
+          actionPlan: detail.actionPlan ?? [],
+          risks: detail.risks ?? [],
+          tools: detail.tools ?? []
+        })
+        setShowSaveOffer(false)
         setBootstrapping(false)
       } catch (err) {
         if (gen !== loadGen.current) return
         setError(err?.message || 'Failed to load mission')
         setInput('')
         setResult({ actionPlan: [], risks: [], tools: [] })
+        setShowSaveOffer(false)
         setBootstrapping(false)
       }
     })()
-  }, [missionId, resetMissionState])
+  }, [missionId, resetMissionState, location.state])
 
   const canSubmit =
     input.trim().length > 0 && !loading && !bootstrapping
@@ -96,11 +133,6 @@ export function useMission(missionId) {
     const requestId = ++requestCounter
     latestRequestId = requestId
 
-    console.debug('[analyze] start', {
-      requestId,
-      startedAt: new Date().toISOString()
-    })
-
     setError('')
     setLoading(true)
 
@@ -108,20 +140,11 @@ export function useMission(missionId) {
       const normalized = await analyzeMissionNormalized(input)
 
       if (requestId !== latestRequestId) {
-        console.debug('[analyze] stale response ignored', {
-          requestId,
-          latestRequestId,
-          arrivedAt: new Date().toISOString()
-        })
         return
       }
 
-      console.debug('[analyze] response applied', {
-        requestId,
-        arrivedAt: new Date().toISOString()
-      })
-
       setResult(normalized)
+      setShowSaveOffer(hasAnalysisRows(normalized))
     } catch (err) {
       if (requestId !== latestRequestId) {
         return
@@ -129,11 +152,6 @@ export function useMission(missionId) {
       setError(err?.message || 'Something went wrong.')
     } finally {
       if (requestId === latestRequestId) {
-        console.debug('[analyze] finish', {
-          requestId,
-          finishedAt: new Date().toISOString(),
-          loading: false
-        })
         setLoading(false)
       }
     }
@@ -147,6 +165,9 @@ export function useMission(missionId) {
     error,
     result,
     canSubmit,
-    onSubmit
+    onSubmit,
+    showSaveOffer,
+    dismissSaveOffer,
+    acknowledgeSaveComplete
   }
 }

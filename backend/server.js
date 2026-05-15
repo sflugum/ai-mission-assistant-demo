@@ -12,16 +12,29 @@ import { writeDevPortConfig } from './src/utils/writeDevPortConfig.js'
 // Nodemon does not reload .env on change — restart the server after editing backend/.env.
 
 const app = express()
-// Comma-separated origins (e.g. Vercel preview + prod). Empty list: non-browser clients (no Origin header) still pass; browsers must match exactly.
+const isProduction = process.env.NODE_ENV === 'production'
+
+// Comma-separated origins (e.g. Vercel preview + prod). In production, browsers must match when set.
+// When unset in development, allow any Origin so local Vite (e.g. http://localhost:5173) works behind the proxy.
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',').map((origin) => origin.trim()).filter(Boolean)
   : []
-
 
 app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin) return callback(null, true)
+      if (allowedOrigins.length === 0) {
+        if (isProduction) {
+          return callback(
+            new HttpError(
+              403,
+              'CORS Policy: set ALLOWED_ORIGINS in production (comma-separated browser origins).'
+            )
+          )
+        }
+        return callback(null, true)
+      }
       if (allowedOrigins.includes(origin)) {
         return callback(null, true)
       }
@@ -42,8 +55,6 @@ app.use(missionRoutes)
 // Order matters: 404 runs only when no route matched; errorHandler is last.
 app.use(notFoundHandler)
 app.use(errorHandler)
-
-const isProduction = process.env.NODE_ENV === 'production'
 
 function getInitialPort() {
   const raw = process.env.PORT

@@ -1,6 +1,6 @@
 import { analyzeMission } from './aiService.js'
 
-/** Maps API JSON to the three lists the UI expects (warns if legacy `plan` appears). */
+/** Maps API JSON to the three lists the UI expects. */
 export function normalizeAnalyzeResponse(data) {
   return {
     actionPlan: data.actionPlan,
@@ -12,11 +12,6 @@ export function normalizeAnalyzeResponse(data) {
 /** POST /analyze and return validated actionPlan/risks/tools. */
 export async function analyzeMissionNormalized(input) {
   const data = await analyzeMission(input)
-
-  if ('plan' in data) {
-    // eslint-disable-next-line no-console
-    console.warn("[DEPRECATION] backend still sending legacy 'plan' field")
-  }
 
   const normalized = normalizeAnalyzeResponse(data)
 

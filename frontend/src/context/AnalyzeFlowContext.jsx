@@ -33,12 +33,6 @@ export function AnalyzeFlowProvider({ children }) {
     const requestId = ++requestSeq
     latestStartedRequestId = requestId
 
-    // eslint-disable-next-line no-console
-    console.debug('[analyze-flow] start', {
-      requestId,
-      startedAt: new Date().toISOString()
-    })
-
     setError('')
     setLoading(true)
 
@@ -46,20 +40,8 @@ export function AnalyzeFlowProvider({ children }) {
       const normalized = await analyzeMissionNormalized(input)
 
       if (requestId !== latestStartedRequestId) {
-        // eslint-disable-next-line no-console
-        console.debug('[analyze-flow] stale response ignored', {
-          requestId,
-          latestStartedRequestId,
-          arrivedAt: new Date().toISOString()
-        })
         return false
       }
-
-      // eslint-disable-next-line no-console
-      console.debug('[analyze-flow] response applied', {
-        requestId,
-        arrivedAt: new Date().toISOString()
-      })
 
       setResult(normalized)
       return true
@@ -71,12 +53,6 @@ export function AnalyzeFlowProvider({ children }) {
       return false
     } finally {
       if (requestId === latestStartedRequestId) {
-        // eslint-disable-next-line no-console
-        console.debug('[analyze-flow] finish', {
-          requestId,
-          finishedAt: new Date().toISOString(),
-          loading: false
-        })
         setLoading(false)
       }
     }

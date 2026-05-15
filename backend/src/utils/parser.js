@@ -31,17 +31,12 @@ export function validateAIResponse(data) {
 }
 
 export function parseAndValidateRaw(rawResponse) {
-  console.log('[AI RESPONSE RAW]', rawResponse)
   const jsonText = extractJsonObject(rawResponse)
   if (!jsonText) {
     throw new Error('AI output did not contain a valid JSON object.')
   }
 
   const parsed = JSON.parse(jsonText)
-  console.log('[AI RESPONSE PARSED]', parsed)
-  if ('plan' in parsed) {
-    console.error("[CRITICAL] Legacy 'plan' field detected — migration incomplete")
-  }
 
   const normalizedResponse = {
     actionPlan: parsed?.actionPlan,

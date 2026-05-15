@@ -17,7 +17,7 @@ export default function App() {
       >
         Skip to main content
       </a>
-      <div className="relative min-h-screen pb-52 sm:pb-48 md:pb-44">
+      <div className="relative min-h-screen pb-28 sm:pb-24">
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/results" element={<ResultsPage />} />

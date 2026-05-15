@@ -82,31 +82,103 @@ export async function deleteSavedMission(
   return { error: null }
 }
 
+type MissionLineRow = {
+  category: string
+  sort_order: number
+  line_text: string
+}
+
+function groupMissionLines(rows: MissionLineRow[] | null | undefined) {
+  const pick = (cat: string) =>
+    (rows ?? [])
+      .filter((r) => r.category === cat)
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map((r) => r.line_text)
+
+  return {
+    actionPlan: pick('action_plan'),
+    risks: pick('risk'),
+    tools: pick('tool')
+  }
+}
+
+export type MissionDetail = {
+  title: string | null
+  description: string | null
+  actionPlan: string[]
+  risks: string[]
+  tools: string[]
+  error: Error | null
+}
+
 export async function fetchMissionById(
   client: SupabaseClient | null,
   id: string
-): Promise<{ description: string | null; title: string | null; error: Error | null }> {
-  if (!client) {
-    return { description: null, title: null, error: new Error('Supabase is not configured') }
+): Promise<MissionDetail> {
+  const empty: MissionDetail = {
+    description: null,
+    title: null,
+    actionPlan: [],
+    risks: [],
+    tools: [],
+    error: null
   }
 
-  const { data, error } = await client
+  if (!client) {
+    return { ...empty, error: new Error('Supabase is not configured') }
+  }
+
+  const nested = await client
     .from('missions')
-    .select('title, description')
+    .select('title, description, mission_lines ( category, sort_order, line_text )')
     .eq('id', id)
     .maybeSingle()
 
-  if (error) {
-    return { description: null, title: null, error: new Error(error.message) }
+  if (!nested.error && nested.data) {
+    const raw = nested.data as {
+      title: string | null
+      description: string | null
+      mission_lines: MissionLineRow[] | null
+    }
+    const { actionPlan, risks, tools } = groupMissionLines(raw.mission_lines)
+    return {
+      title: typeof raw.title === 'string' ? raw.title : null,
+      description: typeof raw.description === 'string' ? raw.description : null,
+      actionPlan,
+      risks,
+      tools,
+      error: null
+    }
   }
 
-  if (!data) {
-    return { description: null, title: null, error: new Error('Mission not found') }
+  const msg = nested.error?.message ?? ''
+  if (/mission_lines|schema cache/i.test(msg)) {
+    const legacy = await client
+      .from('missions')
+      .select('title, description')
+      .eq('id', id)
+      .maybeSingle()
+
+    if (legacy.error) {
+      return { ...empty, error: new Error(legacy.error.message) }
+    }
+    if (!legacy.data) {
+      return { ...empty, error: new Error('Mission not found') }
+    }
+    const row = legacy.data as { title: string; description: string | null }
+    return {
+      title: typeof row.title === 'string' ? row.title : null,
+      description: typeof row.description === 'string' ? row.description : null,
+      actionPlan: [],
+      risks: [],
+      tools: [],
+      error: null
+    }
   }
 
-  return {
-    description: typeof data.description === 'string' ? data.description : null,
-    title: typeof data.title === 'string' ? data.title : null,
-    error: null
+  if (nested.error) {
+    return { ...empty, error: new Error(msg || 'Failed to load mission') }
   }
+
+  return { ...empty, error: new Error('Mission not found') }
 }

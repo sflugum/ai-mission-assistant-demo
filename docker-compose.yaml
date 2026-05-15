@@ -12,8 +12,9 @@
 # `host-gateway` extra_hosts entry.
 #
 # Run order:
-#   1. npx supabase start
-#   2. docker compose up
+#   1. cp .env.example .env  (repo root) and fill from `npx supabase status -o env`
+#   2. npx supabase start
+#   3. docker compose up --build
 #
 # If containers show missing modules or broken proxy to `backend:3001`, reset images & volumes:
 #   1. docker compose down -v
@@ -29,18 +30,18 @@ services:
       context: .
       dockerfile: backend/Dockerfile
       target: dev
-    container_name: ai-mission-backend
+    container_name: ai-mission-assistant-demo-backend
     ports:
-      - "3001:3001"
+      - "127.0.0.1:3001:3001"
     env_file:
-      - ./backend/.env
+      - .env
     environment:
-      # Local-Docker overrides. Production values are set in Render's dashboard.
       PORT: 3001
       LISTEN_HOST: "0.0.0.0"
       ALLOWED_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
-      SUPABASE_URL: http://host.docker.internal:54321
-      DATABASE_URL: postgresql://postgres:postgres@host.docker.internal:54322/postgres
+      SUPABASE_URL: ${SUPABASE_URL_DOCKER}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      DATABASE_URL: ${DATABASE_URL_DOCKER}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
@@ -48,18 +49,28 @@ services:
       - /repo/node_modules
       - /repo/backend/node_modules
     command: >
-      sh -c "echo 'Waiting for Supabase API at host.docker.internal:54321...';
-      until node -e \"fetch('http://host.docker.internal:54321/rest/v1/').then(()=>process.exit(0)).catch(()=>process.exit(1))\" 2>/dev/null; do sleep 2; done;
-      echo 'Supabase reachable. Syncing dependencies...';
+      sh -c "echo 'Waiting for Supabase API at host.docker.internal:54321 (max 120s)...';
+      i=0;
+      until node -e \"fetch('http://host.docker.internal:54321/rest/v1/').then(()=>process.exit(0)).catch(()=>process.exit(1))\" 2>/dev/null; do
+        i=$$((i+1));
+        if [ $$i -ge 60 ]; then
+          echo 'WARN: Supabase not reachable. Starting backend anyway (/analyze works; mission DB routes need npx supabase start).';
+          break;
+        fi;
+        sleep 2;
+      done;
+      echo 'Syncing dependencies...';
       cd /repo && npm install;
       echo 'Starting backend.';
       npm run dev --workspace backend"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 120s
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:3001/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 180s
+    networks:
+      - app
     restart: unless-stopped
 
   frontend:
@@ -67,12 +78,17 @@ services:
       context: .
       dockerfile: frontend/Dockerfile
       target: dev
-    container_name: ai-mission-frontend
+    container_name: ai-mission-assistant-demo-frontend
     ports:
-      - "5173:5173"
+      - "127.0.0.1:5173:5173"
+    env_file:
+      - .env
     environment:
-      # Vite proxy target on the Compose network (see vite.config.js).
       VITE_PROXY_TARGET: http://backend:3001
+      # Leave empty in Docker so the browser uses /analyze and /missions via the Vite proxy.
+      VITE_API_URL: ""
+      VITE_SUPABASE_URL: ${VITE_SUPABASE_URL}
+      VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY}
     volumes:
       - ./frontend:/repo/frontend
       - /repo/node_modules
@@ -81,16 +97,25 @@ services:
       sh -c "cd /repo && npm install &&
       npm run dev --workspace frontend -- --host 0.0.0.0"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+    networks:
+      - app
     restart: unless-stopped
 
   vector:
     image: timberio/vector:0.34.2-debian
-    container_name: ai-mission-vector
+    container_name: ai-mission-assistant-demo-vector
     user: root
     environment:
       DOCKER_HOST: unix:///var/run/docker.sock
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./vector.yaml:/etc/vector/vector.yaml:ro
+    networks:
+      - app
     restart: unless-stopped
+
+networks:
+  app:
+    driver: bridge

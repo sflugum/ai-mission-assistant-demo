@@ -50,6 +50,16 @@ export default function MissionSelector() {
     ;(async () => {
       setListLoading(true)
       setListError(null)
+      if (!client) {
+        if (!cancelled) {
+          setListError(
+            'Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY (use http://127.0.0.1:54321 for local CLI).'
+          )
+          setMissions([])
+          setListLoading(false)
+        }
+        return
+      }
       const { data, error } = await fetchSavedMissions(client)
       if (cancelled) return
       if (error) {
@@ -64,7 +74,7 @@ export default function MissionSelector() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [location.pathname, location.key])
 
   useEffect(() => {
     const state = location.state as MissionsLocationState | null
@@ -139,7 +149,7 @@ export default function MissionSelector() {
                 Saved missions
               </h2>
               <p className="max-w-2xl font-sans text-lg leading-relaxed text-slate-300">
-                Most recently analyzed missions appear first.
+                Missions you save after Analyze appear here, most recently updated first.
               </p>
             </div>
 
@@ -175,8 +185,8 @@ export default function MissionSelector() {
             ) : missions.length === 0 ? (
               <div className="rounded-xl border border-slate-700 bg-[#151515] p-6 md:p-8">
                 <p className="text-center font-sans text-lg leading-relaxed text-slate-300">
-                  No saved missions yet. Start above, run Analyze once, and your
-                  mission will slot into this three-column grid.
+                  No saved missions yet. Start a mission, run Analyze, then use Save mission
+                  to add one here.
                 </p>
               </div>
             ) : (

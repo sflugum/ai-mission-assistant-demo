@@ -1,13 +1,22 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useLocation, useNavigate } from 'react-router-dom'
 import Header from './Header.jsx'
 import MissionInput from './MissionInput.jsx'
 import RequirementDisplay from './RequirementDisplay.jsx'
-import { useMission } from '../hooks/useMission.js'
+import SaveMissionModal from './SaveMissionModal.jsx'
+import { useMission, isValidMissionUuid } from '../hooks/useMission.js'
+
+function hasAnalysisRows(r) {
+  const a = r?.actionPlan?.length ?? 0
+  const b = r?.risks?.length ?? 0
+  const c = r?.tools?.length ?? 0
+  return a + b + c > 0
+}
 
 function MissionWorkspacePageInner({ missionId }) {
   const location = useLocation()
   const navigate = useNavigate()
+  const [saveModalOpen, setSaveModalOpen] = useState(false)
   const {
     input,
     setInput,
@@ -16,8 +25,13 @@ function MissionWorkspacePageInner({ missionId }) {
     error,
     result,
     canSubmit,
-    onSubmit
+    onSubmit,
+    showSaveOffer,
+    dismissSaveOffer,
+    acknowledgeSaveComplete
   } = useMission(missionId)
+
+  const routePersistId = isValidMissionUuid(missionId) ? missionId : null
 
   useEffect(() => {
     const state = location.state
@@ -93,9 +107,54 @@ function MissionWorkspacePageInner({ missionId }) {
                   error={error}
                   canSubmit={canSubmit}
                 />
+
+                {!loading && showSaveOffer && hasAnalysisRows(result) ? (
+                  <div className="flex flex-col gap-3 rounded-xl border border-slate-700 bg-[#151515] p-6 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+                    <p className="font-sans text-sm leading-relaxed text-slate-300 sm:flex-1">
+                      Save this analysis to your mission list, or continue without saving.
+                    </p>
+                    <div className="flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        className="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-primary px-5 py-2 font-heading text-sm font-semibold text-white hover:bg-[#3d997c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                        onClick={() => setSaveModalOpen(true)}
+                      >
+                        Save mission…
+                      </button>
+                      <button
+                        type="button"
+                        className="inline-flex min-h-[44px] items-center justify-center rounded-xl border-2 border-slate-500 px-5 py-2 font-heading text-sm font-semibold text-slate-200 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                        onClick={dismissSaveOffer}
+                      >
+                        Not now
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
               </div>
 
               <RequirementDisplay result={result} loading={loading} />
+
+              <SaveMissionModal
+                open={saveModalOpen}
+                onClose={() => setSaveModalOpen(false)}
+                description={input}
+                result={result}
+                routeMissionId={routePersistId}
+                onSaveComplete={(id) => {
+                  acknowledgeSaveComplete()
+                  navigate(`/mission/${id}`, {
+                    state: {
+                      savedSnapshot: {
+                        description: input.trim(),
+                        actionPlan: result.actionPlan ?? [],
+                        risks: result.risks ?? [],
+                        tools: result.tools ?? []
+                      }
+                    }
+                  })
+                }}
+              />
             </div>
           )}
         </div>
