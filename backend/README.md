@@ -43,9 +43,12 @@ Request body for save routes:
 - `GOOGLE_API_KEY` (required)
 - `GOOGLE_MODEL` (optional, default: `gemini-2.5-flash`)
 - `PORT` (optional, default: `3001`)
-- `CORS_ORIGIN` (optional, default: `http://localhost:5173`)
+- `ALLOWED_ORIGINS` (optional; comma-separated browser origins)
+- `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (required for save/load routes)
 
-Create `backend/.env` from `backend/.env.example`.
+Host dev: create `backend/.env` from `backend/.env.example`.
+
+Docker: use repo-root `.env` from `/.env.example` (see root README).
 
 ## Run
 

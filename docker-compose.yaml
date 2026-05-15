@@ -12,8 +12,9 @@
 # `host-gateway` extra_hosts entry.
 #
 # Run order:
-#   1. npx supabase start
-#   2. docker compose up
+#   1. cp .env.example .env  (repo root) and fill from `npx supabase status -o env`
+#   2. npx supabase start
+#   3. docker compose up --build
 #
 # If containers show missing modules or broken proxy to `backend:3001`, reset images & volumes:
 #   1. docker compose down -v
@@ -31,19 +32,16 @@ services:
       target: dev
     container_name: ai-mission-assistant-demo-backend
     ports:
-      - "3001:3001"
+      - "127.0.0.1:3001:3001"
     env_file:
-      - ./backend/.env
+      - .env
     environment:
-      # Local-Docker overrides. Production values are set in Render's dashboard.
       PORT: 3001
       LISTEN_HOST: "0.0.0.0"
-      # Browser Origin is always the host URL (localhost:5173), not a container hostname.
       ALLOWED_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
-      # Reach host Supabase CLI from inside the backend container (not localhost).
-      SUPABASE_URL: http://host.docker.internal:54321
-      SUPABASE_SERVICE_ROLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU
-      DATABASE_URL: postgresql://postgres:postgres@host.docker.internal:54322/postgres
+      SUPABASE_URL: ${SUPABASE_URL_DOCKER}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      DATABASE_URL: ${DATABASE_URL_DOCKER}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
@@ -82,15 +80,15 @@ services:
       target: dev
     container_name: ai-mission-assistant-demo-frontend
     ports:
-      - "5173:5173"
+      - "127.0.0.1:5173:5173"
     env_file:
-      - ./frontend/.env
+      - .env
     environment:
-      # Vite dev proxy: use Compose service DNS (backend), never localhost inside this container.
       VITE_PROXY_TARGET: http://backend:3001
-      # Browser Supabase client must match the DB the backend writes to (local CLI, not production .env).
-      VITE_SUPABASE_URL: http://127.0.0.1:54321
-      VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
+      # Leave empty in Docker so the browser uses /analyze and /missions via the Vite proxy.
+      VITE_API_URL: ""
+      VITE_SUPABASE_URL: ${VITE_SUPABASE_URL}
+      VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY}
     volumes:
       - ./frontend:/repo/frontend
       - /repo/node_modules

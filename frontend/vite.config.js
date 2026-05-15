@@ -70,7 +70,13 @@ export default ({ mode }) => {
   const apiProxy = {
     target: initialProxyTarget,
     changeOrigin: true,
-    router: () => resolveProxyTarget()
+    router: () => resolveProxyTarget(),
+    /** GET /missions is a React Router path; only POST/PUT are Express API calls. */
+    bypass(req) {
+      if (req.method === 'GET') {
+        return '/index.html'
+      }
+    }
   }
 
   return defineConfig({

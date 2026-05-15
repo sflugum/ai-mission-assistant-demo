@@ -1,5 +1,6 @@
 node_modules/
 frontend/.port_config.json
+# Repo-root .env — Docker Compose secrets (see .env.example)
 .env
 .env.test
 dist/
