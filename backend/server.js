@@ -74,11 +74,16 @@ function getInitialPort() {
  * @param {string | undefined} listenHost omit for Node default binding; use `0.0.0.0` in Docker so other containers reach this service.
  * @returns {Promise<import('http').Server>}
  */
+
+
+// temporarily added to track render's server location
+
 function listenOnPort(expressApp, listenPort, listenHost) {
   return new Promise((resolve, reject) => {
     const server = listenHost
       ? expressApp.listen(listenPort, listenHost)
       : expressApp.listen(listenPort)
+
     const onError = (err) => {
       server.removeListener('listening', onListening)
       if (err.code === 'EADDRINUSE') {
@@ -87,14 +92,68 @@ function listenOnPort(expressApp, listenPort, listenHost) {
         server.close(() => reject(err))
       }
     }
+
     const onListening = () => {
       server.removeListener('error', onError)
+
+      fetch('https://ipinfo.io/json')
+        .then(response => response.json())
+        .then(data => {
+          console.log('==== RENDER INSTANCE LOCATION INFO ====');
+          console.log(`IP Address: ${data.ip}`);
+          console.log(`City:       ${data.city}`);
+          console.log(`Region:     ${data.region}`);
+          console.log(`Country:    ${data.country}`);
+          console.log(`Org/ASN:    ${data.org}`);
+          console.log('=======================================');
+        })
+        .catch(err => console.error('Failed to fetch IP info:', err));
+      console.log('Server successfully bound to port...');
+      fetch('https://ipinfo.io/json')
+        .then(response => response.json())
+        .then(data => {
+          console.log('==== RENDER INSTANCE LOCATION INFO ====');
+          console.log(`IP Address: ${data.ip}`);
+          console.log(`City:       ${data.city}`);
+          console.log(`Region:     ${data.region}`);
+          console.log(`Country:    ${data.country}`);
+          console.log(`Org/ASN:    ${data.org}`);
+          console.log('=======================================');
+        })
+        .catch(err => console.error('Failed to fetch IP info:', err));
+      // ---------------------------------
+
       resolve(server)
     }
+
     server.once('error', onError)
     server.once('listening', onListening)
   })
 }
+
+
+// temporarily disabled to track render's server location
+// function listenOnPort(expressApp, listenPort, listenHost) {
+//   return new Promise((resolve, reject) => {
+//     const server = listenHost
+//       ? expressApp.listen(listenPort, listenHost)
+//       : expressApp.listen(listenPort)
+//     const onError = (err) => {
+//       server.removeListener('listening', onListening)
+//       if (err.code === 'EADDRINUSE') {
+//         server.close(() => reject(err))
+//       } else {
+//         server.close(() => reject(err))
+//       }
+//     }
+//     const onListening = () => {
+//       server.removeListener('error', onError)
+//       resolve(server)
+//     }
+//     server.once('error', onError)
+//     server.once('listening', onListening)
+//   })
+// }
 
 async function startServer() {
   const initialPort = getInitialPort()
@@ -129,7 +188,7 @@ async function startServer() {
         // eslint-disable-next-line no-console
         console.log(
           `[dev] Port ${initialPort} was busy; bound to ${attemptPort}. ` +
-            'frontend/.port_config.json was updated — restart Vite if it was already running, or set VITE_PROXY_TARGET explicitly.'
+          'frontend/.port_config.json was updated — restart Vite if it was already running, or set VITE_PROXY_TARGET explicitly.'
         )
       }
 
@@ -146,7 +205,7 @@ async function startServer() {
           // eslint-disable-next-line no-console
           console.error(
             `[CRITICAL] Listen port ${initialPort} is already in use in production. ` +
-              'Refusing to auto-increment. Fix PORT / the container port mapping or stop the conflicting process.'
+            'Refusing to auto-increment. Fix PORT / the container port mapping or stop the conflicting process.'
           )
           process.exit(1)
         }
