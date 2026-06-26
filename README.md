@@ -1,5 +1,7 @@
 # AI Mission Assistant
 
+![Docs Status](https://img.shields.io/badge/docs-updating-orange) ![GitHub last commit](https://img.shields.io/github/last-commit/sflugum/ai-mission-assistant-demo)
+
 AI Mission Assistant transforms natural language ideas into structured project frameworks. Users describe a goal in plain language and receive a breakdown of action steps, potential risks, and recommended tools. Powered by the Gemini 2.5 Flash API.
 
 This project documents my process of building a full-stack AI application with an emphasis on responsible development: deliberate architectural decisions, human-in-the-loop verification, and tradeoffs made to keep the system intentional and maintainable.
