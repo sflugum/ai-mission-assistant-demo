@@ -6,6 +6,11 @@ frontend/.port_config.json
 dist/
 .DS_Store
 
+.cursor/
+.trae/
+.vscode/
+
+
 test-results/
 playwright-report/
 blob-report/
