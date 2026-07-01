@@ -1,4 +1,5 @@
 # Monorepo: build with context = repository root (`docker compose` / `docker build -f frontend/Dockerfile .`).
+# Uses root package-lock.json + npm workspaces so hoisted deps resolve correctly.
 
 FROM node:22-alpine AS base
 WORKDIR /repo

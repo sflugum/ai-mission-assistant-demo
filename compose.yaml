@@ -1,29 +1,3 @@
-# Local development orchestration for the AI Mission Assistant.
-#
-# Strategy (Hybrid / Option A):
-#   - Postgres + Supabase services are managed separately by the Supabase CLI:
-#         npx supabase start
-#     The CLI owns DB lifecycle, migrations (./supabase/migrations), and seeds.
-#   - This compose file orchestrates the *application* services only:
-#         frontend (Vite), backend (Express), vector (log aggregator).
-#
-# The backend reaches the local Supabase API/DB through `host.docker.internal`,
-# which is automatic on Docker Desktop and bridged on Linux via the
-# `host-gateway` extra_hosts entry.
-#
-# Run order:
-#   1. cp .env.example .env  (repo root) and fill from `npx supabase status -o env`
-#   2. npx supabase start
-#   3. docker compose up --build
-#
-# If containers show missing modules or broken proxy to `backend:3001`, reset images & volumes:
-#   1. docker compose down -v
-#   2. docker compose build --no-cache
-#   3. docker compose up
-#
-# Build context is the repo root so Docker sees root `package-lock.json` (npm workspaces).
-# Bind mounts align with WORKDIR `/repo`: hoisted deps stay under `/repo/node_modules`.
-
 services:
   backend:
     build:
@@ -39,27 +13,13 @@ services:
       PORT: 3001
       LISTEN_HOST: "0.0.0.0"
       ALLOWED_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
-      SUPABASE_URL: ${SUPABASE_URL_DOCKER}
-      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
-      DATABASE_URL: ${DATABASE_URL_DOCKER}
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      DATABASE_URL: ${DATABASE_URL}
     volumes:
       - ./backend:/repo/backend
       - /repo/node_modules
       - /repo/backend/node_modules
     command: >
-      sh -c "echo 'Waiting for Supabase API at host.docker.internal:54321 (max 120s)...';
-      i=0;
-      until node -e \"fetch('http://host.docker.internal:54321/rest/v1/').then(()=>process.exit(0)).catch(()=>process.exit(1))\" 2>/dev/null; do
-        i=$$((i+1));
-        if [ $$i -ge 60 ]; then
-          echo 'WARN: Supabase not reachable. Starting backend anyway (/analyze works; mission DB routes need npx supabase start).';
-          break;
-        fi;
-        sleep 2;
-      done;
-      echo 'Syncing dependencies...';
+      sh -c "echo 'Syncing dependencies...';
       cd /repo && npm install;
       echo 'Starting backend.';
       npm run dev --workspace backend"
@@ -68,7 +28,7 @@ services:
       interval: 15s
       timeout: 5s
       retries: 5
-      start_period: 180s
+      start_period: 30s
     networks:
       - app
     restart: unless-stopped
@@ -85,10 +45,7 @@ services:
       - .env
     environment:
       VITE_PROXY_TARGET: http://backend:3001
-      # Leave empty in Docker so the browser uses /analyze and /missions via the Vite proxy.
       VITE_API_URL: ""
-      VITE_SUPABASE_URL: ${VITE_SUPABASE_URL}
-      VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY}
     volumes:
       - ./frontend:/repo/frontend
       - /repo/node_modules
