@@ -23,7 +23,9 @@
     "dev:backend": "npm run dev --workspace backend",
     "build": "npm run build --workspace frontend",
     "preview": "npm run preview --workspace frontend",
-    "start:backend": "npm run start --workspace backend"
+    "start:backend": "npm run start --workspace backend",
+    "start": "node backend/server.js",
+    "migrate": "node scripts/migrate.js"
   },
   "devDependencies": {
     "@types/node": "^25.7.0",

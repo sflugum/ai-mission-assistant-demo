@@ -58,7 +58,6 @@ function parseSaveBody(body) {
   }
 }
 
-/** POST /analyze — async errors flow to `errorMiddleware` via `asyncHandler` on the route. */
 export async function analyzeMission(req, res) {
   const input = req?.body?.input
   if (typeof input !== 'string' || input.trim().length === 0) {
@@ -72,7 +71,6 @@ export async function analyzeMission(req, res) {
   return res.json(analysis)
 }
 
-/** POST /missions — persist mission brief + selected analysis lines. */
 export async function createMission(req, res) {
   const { description, resolvedTitle, actionPlan, risks, tools } = parseSaveBody(
     req.body ?? {}
@@ -84,26 +82,33 @@ export async function createMission(req, res) {
   try {
     await client.query('BEGIN')
 
-    // 1. Insert the mission
     const missionRes = await client.query(
       'INSERT INTO missions (title, description) VALUES ($1, $2) RETURNING id',
       [resolvedTitle, description]
     )
     const missionId = missionRes.rows[0].id
 
-    // 2. Insert the mission lines
     const lineRows = buildLineInsertRows(missionId, actionPlan, risks, tools)
+    
     if (lineRows.length > 0) {
+      const keys = Object.keys(lineRows[0])
+      const values = []
+      const placeholders = []
+      
+      let paramIndex = 1
       for (const row of lineRows) {
-        const keys = Object.keys(row)
-        const values = Object.values(row)
-        const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ')
-        
-        await client.query(
-          `INSERT INTO mission_lines (${keys.join(', ')}) VALUES (${placeholders})`,
-          values
-        )
+        const rowPlaceholders = []
+        for (const key of keys) {
+          values.push(row[key])
+          rowPlaceholders.push(`$${paramIndex++}`)
+        }
+        placeholders.push(`(${rowPlaceholders.join(', ')})`)
       }
+      
+      await client.query(
+        `INSERT INTO mission_lines (${keys.join(', ')}) VALUES ${placeholders.join(', ')}`,
+        values
+      )
     }
 
     await client.query('COMMIT')
@@ -117,7 +122,6 @@ export async function createMission(req, res) {
   }
 }
 
-/** PUT /missions/:id — replace mission metadata and all stored lines. */
 export async function replaceMission(req, res) {
   const rawId = req.params?.id
   if (typeof rawId !== 'string' || !UUID_RE.test(rawId)) {
@@ -134,34 +138,40 @@ export async function replaceMission(req, res) {
   try {
     await client.query('BEGIN')
 
-    // 1. Verify existing mission
     const checkRes = await client.query('SELECT id FROM missions WHERE id = $1', [rawId])
     if (checkRes.rowCount === 0) {
       throw new HttpError(404, 'Mission not found')
     }
 
-    // 2. Clear old mission lines
     await client.query('DELETE FROM mission_lines WHERE mission_id = $1', [rawId])
 
-    // 3. Update the mission metadata
     await client.query(
       'UPDATE missions SET title = $1, description = $2 WHERE id = $3',
       [resolvedTitle, description, rawId]
     )
 
-    // 4. Insert new lines
     const lineRows = buildLineInsertRows(rawId, actionPlan, risks, tools)
+    
+    // Efficiency Upgrade: Bulk Insert
     if (lineRows.length > 0) {
+      const keys = Object.keys(lineRows[0])
+      const values = []
+      const placeholders = []
+      
+      let paramIndex = 1
       for (const row of lineRows) {
-        const keys = Object.keys(row)
-        const values = Object.values(row)
-        const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ')
-        
-        await client.query(
-          `INSERT INTO mission_lines (${keys.join(', ')}) VALUES (${placeholders})`,
-          values
-        )
+        const rowPlaceholders = []
+        for (const key of keys) {
+          values.push(row[key])
+          rowPlaceholders.push(`$${paramIndex++}`)
+        }
+        placeholders.push(`(${rowPlaceholders.join(', ')})`)
       }
+      
+      await client.query(
+        `INSERT INTO mission_lines (${keys.join(', ')}) VALUES ${placeholders.join(', ')}`,
+        values
+      )
     }
 
     await client.query('COMMIT')
@@ -175,7 +185,6 @@ export async function replaceMission(req, res) {
   }
 }
 
-/** GET /missions — List all saved missions */
 export async function getMissions(req, res) {
   const pool = getNeonPool()
   try {
@@ -189,7 +198,6 @@ export async function getMissions(req, res) {
   }
 }
 
-/** GET /missions/:id — Fetch a single mission and its lines */
 export async function getMissionById(req, res) {
   const rawId = req.params?.id
   if (typeof rawId !== 'string' || !UUID_RE.test(rawId)) {
@@ -198,7 +206,6 @@ export async function getMissionById(req, res) {
 
   const pool = getNeonPool()
   try {
-    // 1. Fetch the mission metadata
     const missionRes = await pool.query(
       'SELECT title, description FROM missions WHERE id = $1',
       [rawId]
@@ -208,13 +215,11 @@ export async function getMissionById(req, res) {
     }
     const mission = missionRes.rows[0]
 
-    // 2. Fetch the associated lines
     const linesRes = await pool.query(
       'SELECT category, sort_order, line_text FROM mission_lines WHERE mission_id = $1 ORDER BY sort_order ASC',
       [rawId]
     )
 
-    // 3. Map the lines into the arrays expected by the frontend
     const actionPlan = []
     const risks = []
     const tools = []
@@ -238,7 +243,6 @@ export async function getMissionById(req, res) {
   }
 }
 
-/** DELETE /missions/:id — Delete a mission and its lines */
 export async function deleteMission(req, res) {
   const rawId = req.params?.id
   if (typeof rawId !== 'string' || !UUID_RE.test(rawId)) {
@@ -246,26 +250,18 @@ export async function deleteMission(req, res) {
   }
 
   const pool = getNeonPool()
-  const client = await pool.connect()
-
   try {
-    await client.query('BEGIN')
-
-    // Delete lines first to prevent foreign key constraint errors
-    await client.query('DELETE FROM mission_lines WHERE mission_id = $1', [rawId])
-
-    const delRes = await client.query('DELETE FROM missions WHERE id = $1', [rawId])
+    // Efficiency Upgrade: Transaction removed. 
+    // ON DELETE CASCADE handles the mission_lines automatically.
+    const delRes = await pool.query('DELETE FROM missions WHERE id = $1', [rawId])
+    
     if (delRes.rowCount === 0) {
       throw new HttpError(404, 'Mission not found')
     }
 
-    await client.query('COMMIT')
     return res.status(204).send()
   } catch (err) {
-    await client.query('ROLLBACK')
     if (err instanceof HttpError) throw err
     throw new HttpError(502, `Failed to delete mission: ${err.message}`)
-  } finally {
-    client.release()
   }
 }
