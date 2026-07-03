@@ -12,25 +12,12 @@ export class HttpError extends Error {
   }
 }
 
-/**
- * Express 404 handler — pass to global error middleware as HttpError.
- */
 export function notFoundHandler(req, _res, next) {
   next(new HttpError(404, `Cannot ${req.method} ${req.originalUrl}`))
 }
 
-/**
- * Global Express error handler — mount after all routes.
- */
 export function errorHandler(err, _req, res, _next) {
-  const statusFromErr =
-    typeof err?.statusCode === 'number'
-      ? err.statusCode
-      : typeof err?.status === 'number'
-        ? err.status
-        : undefined
-
-  let status = statusFromErr ?? 500
+  let status = typeof err?.statusCode === 'number' ? err.statusCode : 500
   let message = typeof err?.message === 'string' ? err.message : 'Internal Server Error'
 
   if (err instanceof SyntaxError && 'body' in err) {
@@ -43,6 +30,11 @@ export function errorHandler(err, _req, res, _next) {
     message = 'AI response failed validation after retry'
   }
 
+  if (err?.code && typeof err.code === 'string' && err.code.length === 5) {
+    status = 502 
+    message = isDev ? `Database error (${err.code}): ${err.message}` : 'A database error occurred'
+  }
+
   if (isDev && err?.stack) {
     // eslint-disable-next-line no-console
     console.error(err.stack)
@@ -50,7 +42,6 @@ export function errorHandler(err, _req, res, _next) {
 
   const stack = isDev && typeof err?.stack === 'string' ? err.stack : ''
 
-  // In production, `stack` is omitted so clients never see server paths or internals.
   res.status(status).json({
     success: false,
     message,

@@ -1,15 +1,5 @@
 import { MISSIONS_SAVE_URL, missionReplaceUrl } from '../api/config.js'
 
-function augmentSaveErrorMessage(msg) {
-  if (
-    typeof msg === 'string' &&
-    /mission_lines|schema cache/i.test(msg)
-  ) {
-    return `${msg} Apply Supabase migrations (for example \`supabase db push\` against the database your backend uses) so public.mission_lines exists.`
-  }
-  return msg
-}
-
 async function readErrorMessage(res) {
   const text = await res.text().catch(() => '')
   if (!text) return `Request failed: ${res.status}`
@@ -35,7 +25,7 @@ export async function createMissionPersist(payload) {
     body: JSON.stringify(payload)
   })
   if (!res.ok) {
-    throw new Error(augmentSaveErrorMessage(await readErrorMessage(res)))
+    throw new Error(await readErrorMessage(res))
   }
   return res.json()
 }
@@ -52,7 +42,7 @@ export async function replaceMissionPersist(missionId, payload) {
     body: JSON.stringify(payload)
   })
   if (!res.ok) {
-    throw new Error(augmentSaveErrorMessage(await readErrorMessage(res)))
+    throw new Error(await readErrorMessage(res))
   }
   return res.json()
 }

@@ -28,16 +28,6 @@ function readBackendPortConfigBaseUrl() {
 export default ({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
-  const requiredEnvs = ['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY'];
-  for (const key of requiredEnvs) {
-    if (!(process.env[key] || env[key])) {
-      throw new Error(
-        `\n\n BUILD FAILURE: Missing environment variable ${key}\n` +
-        `Ensure this key is added to your Vercel Project Settings. \n`
-      );
-    }
-  }
-
   // process.env wins (Docker Compose `environment:`); loadEnv reads frontend/.env on disk.
   const envProxyTarget = (
     process.env.VITE_PROXY_TARGET ||
@@ -67,14 +57,17 @@ export default ({ mode }) => {
     console.info(`[vite] API proxy → ${envProxyTarget} (VITE_PROXY_TARGET)`)
   }
 
-  const apiProxy = {
+const apiProxy = {
     target: initialProxyTarget,
     changeOrigin: true,
     router: () => resolveProxyTarget(),
-    /** GET /missions is a React Router path; only POST/PUT are Express API calls. */
     bypass(req) {
+      const url = req.url || '';
+      if (url.startsWith('/missions') || url.startsWith('/analyze')) {
+        return null; 
+      }
       if (req.method === 'GET') {
-        return '/index.html'
+        return '/index.html';
       }
     }
   }
@@ -91,7 +84,6 @@ export default ({ mode }) => {
       port: 5173,
       strictPort: true,
 
-      // Development convenience: avoid CORS by proxying to the Express backend.
       proxy: {
         '/analyze': apiProxy,
         '/missions': apiProxy

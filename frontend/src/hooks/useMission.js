@@ -1,10 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { analyzeMissionNormalized } from '../services/analyzeNormalized.js'
-import { getBrowserSupabase } from '../lib/supabaseClient'
 import { fetchMissionById } from '../services/missions'
 
-// Module-level ids: ignore late responses if missionId or submit race changes mid-flight.
 let requestCounter = 0
 let latestRequestId = 0
 
@@ -26,9 +24,6 @@ function hasAnalysisRows(normalized) {
   return a + r + t > 0
 }
 
-/**
- * `/mission/new` starts empty; `/mission/:uuid` hydrates from Supabase. Analyze uses the same normalized shape as the landing quick-flow.
- */
 export function useMission(missionId) {
   const location = useLocation()
   const [input, setInput] = useState('')
@@ -71,7 +66,6 @@ export function useMission(missionId) {
     }
 
     const gen = ++loadGen.current
-    const supabase = getBrowserSupabase()
 
     const snapshot = location.state?.savedSnapshot
     if (
@@ -91,7 +85,8 @@ export function useMission(missionId) {
       try {
         setBootstrapping(true)
         setError('')
-        const detail = await fetchMissionById(supabase, missionId)
+        
+        const detail = await fetchMissionById(missionId)
 
         if (gen !== loadGen.current) return
 
