@@ -2,12 +2,12 @@
 
 ## Security (SQL injection)
 
-- Persisted data writes use **`@supabase/supabase-js`** (`.insert()` / builders), which invoke **parameterized PostgREST** requests—not string‑concatenated SQL.
+- Persisted data writes use **`pg`** (Postgres client), which invoke **parameterized Postgres** requests—not string‑concatenated SQL.
 - **`input`** is validated as a trimmed string before any Gemini call (`analyzeMission`).
 - **`POST /missions`** and **`PUT /missions/:id`** validate JSON bodies before writes (`createMission`, `replaceMission`).
 - If you introduce **direct Postgres** access (for example via `pg`), use **placeholder parameters** (`$1`, `$2`, … / named binds) exclusively; never interpolate user‑controlled fragments into SQL text.
 
-Schema changes for this repo stay in **`supabase/migrations`** (Supabase CLI), separate from application queries.
+Schema changes for this repo stay in **`src/db/migrations`**, separate from application queries.
 
 ## Endpoints
 
@@ -44,7 +44,7 @@ Request body for save routes:
 - `GOOGLE_MODEL` (optional, default: `gemini-2.5-flash`)
 - `PORT` (optional, default: `3001`)
 - `ALLOWED_ORIGINS` (optional; comma-separated browser origins)
-- `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (required for save/load routes)
+- `DATABASE_URL` (required for save/load routes)
 
 Host dev: create `backend/.env` from `backend/.env.example`.
 
