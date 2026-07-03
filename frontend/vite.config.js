@@ -61,14 +61,14 @@ const apiProxy = {
     target: initialProxyTarget,
     changeOrigin: true,
     router: () => resolveProxyTarget(),
-    bypass(req) {
+    bypass(req, res, options) {
       const url = req.url || '';
-      if (url.startsWith('/missions') || url.startsWith('/analyze')) {
-        return null; 
+      // If it's a /missions route and the browser expects HTML (direct navigation/refresh)
+      if (url.startsWith('/missions') && req.headers.accept && req.headers.accept.includes('text/html')) {
+        return '/index.html'; // Serve index.html for client-side routing
       }
-      if (req.method === 'GET') {
-        return '/index.html';
-      }
+      // For /analyze or other /missions requests (e.g., fetch API calls expecting JSON), proxy them
+      return null;
     }
   }
 
