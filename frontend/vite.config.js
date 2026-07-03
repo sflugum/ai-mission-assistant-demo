@@ -64,7 +64,7 @@ const apiProxy = {
     bypass(req, res, options) {
       const url = req.url || '';
       // If it's a /missions route and the browser expects HTML (direct navigation/refresh)
-      if (url.startsWith('/missions') && req.headers.accept && req.headers.accept.includes('text/html')) {
+      if (url.startsWith('/api/missions') && req.headers.accept && req.headers.accept.includes('text/html')) {
         return '/index.html'; // Serve index.html for client-side routing
       }
       // For /analyze or other /missions requests (e.g., fetch API calls expecting JSON), proxy them
@@ -85,8 +85,8 @@ const apiProxy = {
       strictPort: true,
 
       proxy: {
-        '/analyze': apiProxy,
-        '/missions': apiProxy
+        '/api/analyze': apiProxy,
+        '/api/missions': apiProxy
       }
     }
   })
