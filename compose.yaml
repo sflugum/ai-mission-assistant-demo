@@ -8,12 +8,11 @@ services:
     ports:
       - "127.0.0.1:3001:3001"
     env_file:
-      - .env
+      - backend/.env
     environment:
       PORT: 3001
       LISTEN_HOST: "0.0.0.0"
       ALLOWED_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
-      DATABASE_URL: ${DATABASE_URL}
     volumes:
       - ./backend:/repo/backend
       - /repo/node_modules
@@ -42,7 +41,7 @@ services:
     ports:
       - "127.0.0.1:5173:5173"
     env_file:
-      - .env
+      - frontend/.env
     environment:
       VITE_PROXY_TARGET: http://backend:3001
       VITE_API_URL: ""

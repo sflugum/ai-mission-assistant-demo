@@ -1,4 +1,4 @@
-import { getSupabaseClient } from '../config/supabase.js'
+import { getNeonPool } from '../config/neon.js'
 import { generateAnalysisWithGemini } from '../services/geminiService.js'
 import { validateAIResponse } from '../utils/parser.js'
 import { HttpError } from '../middleware/errorMiddleware.js'
@@ -78,46 +78,43 @@ export async function createMission(req, res) {
     req.body ?? {}
   )
 
-  let supabase
+  const pool = getNeonPool()
+  const client = await pool.connect()
+
   try {
-    supabase = getSupabaseClient()
-  } catch (err) {
-    if (err instanceof HttpError) throw err
-    throw new HttpError(
-      503,
-      'Database is not configured: set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY on the server.'
+    await client.query('BEGIN')
+
+    // 1. Insert the mission
+    const missionRes = await client.query(
+      'INSERT INTO missions (title, description) VALUES ($1, $2) RETURNING id',
+      [resolvedTitle, description]
     )
-  }
+    const missionId = missionRes.rows[0].id
 
-  const { data: mission, error: insertErr } = await supabase
-    .from('missions')
-    .insert({
-      title: resolvedTitle,
-      description
-    })
-    .select('id')
-    .single()
-
-  if (insertErr || !mission?.id) {
-    throw new HttpError(
-      502,
-      `Failed to create mission: ${insertErr?.message ?? 'unknown error'}`
-    )
-  }
-
-  const lineRows = buildLineInsertRows(mission.id, actionPlan, risks, tools)
-  if (lineRows.length > 0) {
-    const { error: linesErr } = await supabase.from('mission_lines').insert(lineRows)
-    if (linesErr) {
-      await supabase.from('missions').delete().eq('id', mission.id)
-      throw new HttpError(
-        502,
-        `Failed to save mission lines: ${linesErr.message}`
-      )
+    // 2. Insert the mission lines
+    const lineRows = buildLineInsertRows(missionId, actionPlan, risks, tools)
+    if (lineRows.length > 0) {
+      for (const row of lineRows) {
+        const keys = Object.keys(row)
+        const values = Object.values(row)
+        const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ')
+        
+        await client.query(
+          `INSERT INTO mission_lines (${keys.join(', ')}) VALUES (${placeholders})`,
+          values
+        )
+      }
     }
-  }
 
-  return res.status(201).json({ missionId: mission.id })
+    await client.query('COMMIT')
+    return res.status(201).json({ missionId })
+  } catch (err) {
+    await client.query('ROLLBACK')
+    if (err instanceof HttpError) throw err
+    throw new HttpError(502, `Failed to create mission: ${err.message}`)
+  } finally {
+    client.release()
+  }
 }
 
 /** PUT /missions/:id — replace mission metadata and all stored lines. */
@@ -131,61 +128,144 @@ export async function replaceMission(req, res) {
     req.body ?? {}
   )
 
-  let supabase
+  const pool = getNeonPool()
+  const client = await pool.connect()
+
   try {
-    supabase = getSupabaseClient()
+    await client.query('BEGIN')
+
+    // 1. Verify existing mission
+    const checkRes = await client.query('SELECT id FROM missions WHERE id = $1', [rawId])
+    if (checkRes.rowCount === 0) {
+      throw new HttpError(404, 'Mission not found')
+    }
+
+    // 2. Clear old mission lines
+    await client.query('DELETE FROM mission_lines WHERE mission_id = $1', [rawId])
+
+    // 3. Update the mission metadata
+    await client.query(
+      'UPDATE missions SET title = $1, description = $2 WHERE id = $3',
+      [resolvedTitle, description, rawId]
+    )
+
+    // 4. Insert new lines
+    const lineRows = buildLineInsertRows(rawId, actionPlan, risks, tools)
+    if (lineRows.length > 0) {
+      for (const row of lineRows) {
+        const keys = Object.keys(row)
+        const values = Object.values(row)
+        const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ')
+        
+        await client.query(
+          `INSERT INTO mission_lines (${keys.join(', ')}) VALUES (${placeholders})`,
+          values
+        )
+      }
+    }
+
+    await client.query('COMMIT')
+    return res.json({ missionId: rawId })
+  } catch (err) {
+    await client.query('ROLLBACK')
+    if (err instanceof HttpError) throw err
+    throw new HttpError(502, `Failed to update mission: ${err.message}`)
+  } finally {
+    client.release()
+  }
+}
+
+/** GET /missions — List all saved missions */
+export async function getMissions(req, res) {
+  const pool = getNeonPool()
+  try {
+    const { rows } = await pool.query(
+      'SELECT id, title, status, created_at, updated_at FROM missions ORDER BY COALESCE(updated_at, created_at) DESC'
+    )
+    return res.json(rows)
   } catch (err) {
     if (err instanceof HttpError) throw err
-    throw new HttpError(
-      503,
-      'Database is not configured: set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY on the server.'
+    throw new HttpError(502, `Failed to fetch missions: ${err.message}`)
+  }
+}
+
+/** GET /missions/:id — Fetch a single mission and its lines */
+export async function getMissionById(req, res) {
+  const rawId = req.params?.id
+  if (typeof rawId !== 'string' || !UUID_RE.test(rawId)) {
+    throw new HttpError(400, 'mission id must be a valid UUID')
+  }
+
+  const pool = getNeonPool()
+  try {
+    // 1. Fetch the mission metadata
+    const missionRes = await pool.query(
+      'SELECT title, description FROM missions WHERE id = $1',
+      [rawId]
     )
-  }
-
-  const { data: existing, error: fetchErr } = await supabase
-    .from('missions')
-    .select('id')
-    .eq('id', rawId)
-    .maybeSingle()
-
-  if (fetchErr) {
-    throw new HttpError(502, `Failed to verify mission: ${fetchErr.message}`)
-  }
-  if (!existing) {
-    throw new HttpError(404, 'Mission not found')
-  }
-
-  const { error: delErr } = await supabase
-    .from('mission_lines')
-    .delete()
-    .eq('mission_id', rawId)
-
-  if (delErr) {
-    throw new HttpError(502, `Failed to clear mission lines: ${delErr.message}`)
-  }
-
-  const { error: updErr } = await supabase
-    .from('missions')
-    .update({
-      title: resolvedTitle,
-      description
-    })
-    .eq('id', rawId)
-
-  if (updErr) {
-    throw new HttpError(502, `Failed to update mission: ${updErr.message}`)
-  }
-
-  const lineRows = buildLineInsertRows(rawId, actionPlan, risks, tools)
-  if (lineRows.length > 0) {
-    const { error: linesErr } = await supabase.from('mission_lines').insert(lineRows)
-    if (linesErr) {
-      throw new HttpError(
-        502,
-        `Failed to save mission lines: ${linesErr.message}`
-      )
+    if (missionRes.rowCount === 0) {
+      throw new HttpError(404, 'Mission not found')
     }
+    const mission = missionRes.rows[0]
+
+    // 2. Fetch the associated lines
+    const linesRes = await pool.query(
+      'SELECT category, sort_order, line_text FROM mission_lines WHERE mission_id = $1 ORDER BY sort_order ASC',
+      [rawId]
+    )
+
+    // 3. Map the lines into the arrays expected by the frontend
+    const actionPlan = []
+    const risks = []
+    const tools = []
+
+    for (const row of linesRes.rows) {
+      if (row.category === 'action_plan') actionPlan.push(row.line_text)
+      else if (row.category === 'risk') risks.push(row.line_text)
+      else if (row.category === 'tool') tools.push(row.line_text)
+    }
+
+    return res.json({
+      title: mission.title,
+      description: mission.description,
+      actionPlan,
+      risks,
+      tools
+    })
+  } catch (err) {
+    if (err instanceof HttpError) throw err
+    throw new HttpError(502, `Failed to fetch mission: ${err.message}`)
+  }
+}
+
+/** DELETE /missions/:id — Delete a mission and its lines */
+export async function deleteMission(req, res) {
+  const rawId = req.params?.id
+  if (typeof rawId !== 'string' || !UUID_RE.test(rawId)) {
+    throw new HttpError(400, 'mission id must be a valid UUID')
   }
 
-  return res.json({ missionId: rawId })
+  const pool = getNeonPool()
+  const client = await pool.connect()
+
+  try {
+    await client.query('BEGIN')
+
+    // Delete lines first to prevent foreign key constraint errors
+    await client.query('DELETE FROM mission_lines WHERE mission_id = $1', [rawId])
+
+    const delRes = await client.query('DELETE FROM missions WHERE id = $1', [rawId])
+    if (delRes.rowCount === 0) {
+      throw new HttpError(404, 'Mission not found')
+    }
+
+    await client.query('COMMIT')
+    return res.status(204).send()
+  } catch (err) {
+    await client.query('ROLLBACK')
+    if (err instanceof HttpError) throw err
+    throw new HttpError(502, `Failed to delete mission: ${err.message}`)
+  } finally {
+    client.release()
+  }
 }
