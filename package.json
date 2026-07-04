@@ -3,6 +3,8 @@
   "name": "ai-mission-assistant-demo",
   "version": "0.1.0",
   "private": true,
+  "os": ["darwin", "linux", "win32"],
+  "cpu": ["x64", "arm64"],
   "description": "AI Mission Assistant demo — React (Vite) frontend, Express backend, Neon (Postgres).",
   "type": "module",
   "license": "UNLICENSED",
