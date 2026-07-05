@@ -28,7 +28,7 @@ export async function fetchSavedMissions(): Promise<{
   error: Error | null
 }> {
   try {
-    const apiUrl = import.meta.env.VITE_API_URL || '';
+    const apiUrl = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
     const res = await fetch(`${apiUrl}/api/missions`);
     if (!res.ok) {
       const text = await res.text()
@@ -54,7 +54,7 @@ export async function fetchSavedMissions(): Promise<{
 
 export async function deleteSavedMission(id: string): Promise<{ error: Error | null }> {
   try {
-    const apiUrl = import.meta.env.VITE_API_URL || '';
+    const apiUrl = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
     const res = await fetch(`${apiUrl}/api/missions/${id}`, { method: 'DELETE' });
     if (!res.ok) {
       const text = await res.text()
@@ -68,7 +68,7 @@ export async function deleteSavedMission(id: string): Promise<{ error: Error | n
 
 export async function fetchMissionById(id: string): Promise<MissionDetail> {
   try {
-    const apiUrl = import.meta.env.VITE_API_URL || '';
+    const apiUrl = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
     const res = await fetch(`${apiUrl}/api/missions/${id}`);
     if (!res.ok) {
       if (res.status === 404) return { ...emptyDetail, error: new Error('Mission not found') }
