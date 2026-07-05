@@ -5,11 +5,11 @@
  */
 export const API_BASE_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '')
 
-export const ANALYZE_URL = API_BASE_URL ? `${API_BASE_URL}/analyze` : '/analyze'
+export const ANALYZE_URL = API_BASE_URL ? `${API_BASE_URL}/api/analyze` : '/analyze'
 
-export const MISSIONS_SAVE_URL = API_BASE_URL ? `${API_BASE_URL}/missions` : '/missions'
+export const MISSIONS_SAVE_URL = API_BASE_URL ? `${API_BASE_URL}/api/missions` : '/missions'
 
 export function missionReplaceUrl(id) {
   const enc = encodeURIComponent(id)
-  return API_BASE_URL ? `${API_BASE_URL}/missions/${enc}` : `/missions/${enc}`
+  return API_BASE_URL ? `${API_BASE_URL}/api/missions/${enc}` : `/api/missions/${enc}`
 }
