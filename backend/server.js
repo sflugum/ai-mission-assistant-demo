@@ -46,7 +46,7 @@ app.get('/health', (_req, res) => {
   res.status(200).json({ ok: true })
 })
 
-app.use(missionRoutes)
+app.use('/api', missionRoutes)
 
 app.use(notFoundHandler)
 app.use(errorHandler)

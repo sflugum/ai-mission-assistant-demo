@@ -3,7 +3,9 @@
   "name": "ai-mission-assistant-demo",
   "version": "0.1.0",
   "private": true,
-  "description": "AI Mission Assistant demo — React (Vite) frontend, Express backend, Supabase (Postgres).",
+  "os": ["darwin", "linux", "win32"],
+  "cpu": ["x64", "arm64"],
+  "description": "AI Mission Assistant demo — React (Vite) frontend, Express backend, Neon (Postgres).",
   "type": "module",
   "license": "UNLICENSED",
   "engines": {
@@ -14,11 +16,9 @@
     "backend"
   ],
   "scripts": {
-    "types:generate": "supabase gen types typescript --local --schema public > frontend/src/types/database.types.ts",
-    "db:test": "supabase db test --local",
     "test": "npm run test:run",
-    "test:run": "npm run db:test && npm run test:run --workspace frontend",
-    "test:e2e": "npm run db:test && npm run test:e2e --workspace frontend",
+    "test:run": "npm run test:run --workspace frontend",
+    "test:e2e": "npm run test:e2e --workspace frontend",
     "dev": "npm run dev --workspace frontend",
     "dev:backend": "npm run dev --workspace backend",
     "build": "npm run build --workspace frontend",
@@ -28,10 +28,12 @@
     "migrate": "node scripts/migrate.js"
   },
   "devDependencies": {
-    "@types/node": "^25.7.0",
-    "supabase": "^2.98.2"
+    "@types/node": "^25.7.0"
   },
   "dependencies": {
     "pg": "^8.22.0"
+  },
+  "optionalDependencies": {
+    "lightningcss-linux-x64-gnu": "^1.29.0"
   }
 }

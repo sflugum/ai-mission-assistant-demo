@@ -28,7 +28,7 @@ export async function fetchSavedMissions(): Promise<{
   error: Error | null
 }> {
   try {
-    const res = await fetch('/missions')
+    const res = await fetch('/api/missions')
     if (!res.ok) {
       const text = await res.text()
       throw new Error(text || `Failed to fetch: ${res.status}`)
@@ -53,7 +53,7 @@ export async function fetchSavedMissions(): Promise<{
 
 export async function deleteSavedMission(id: string): Promise<{ error: Error | null }> {
   try {
-    const res = await fetch(`/missions/${id}`, { method: 'DELETE' })
+    const res = await fetch(`/api/missions/${id}`, { method: 'DELETE' })
     if (!res.ok) {
       const text = await res.text()
       throw new Error(text || `Failed to delete: ${res.status}`)
@@ -66,7 +66,7 @@ export async function deleteSavedMission(id: string): Promise<{ error: Error | n
 
 export async function fetchMissionById(id: string): Promise<MissionDetail> {
   try {
-    const res = await fetch(`/missions/${id}`)
+    const res = await fetch(`/api/missions/${id}`)
     if (!res.ok) {
       if (res.status === 404) return { ...emptyDetail, error: new Error('Mission not found') }
       const text = await res.text()

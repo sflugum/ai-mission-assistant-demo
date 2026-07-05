@@ -34,9 +34,6 @@ export default defineConfig({
     timeout: 180_000,
 
     env: {
-      /** Deterministic missions list during E2E (no flaky loading / staging data). */
-      VITE_SUPABASE_URL: 'https://nzbcsruutdgtwkugmktt.supabase.co',
-      VITE_SUPABASE_ANON_KEY: 'sb_publishable_XnkWn46V8M-tBvcrd_cpUA_nvbvlvA6',
       VITE_API_URL: ''
     }
   }
