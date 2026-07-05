@@ -32,5 +32,8 @@
   },
   "dependencies": {
     "pg": "^8.22.0"
+  },
+  "optionalDependencies": {
+    "lightningcss-linux-x64-gnu": "^1.29.0"
   }
 }
