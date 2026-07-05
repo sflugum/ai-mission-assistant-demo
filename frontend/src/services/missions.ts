@@ -28,32 +28,34 @@ export async function fetchSavedMissions(): Promise<{
   error: Error | null
 }> {
   try {
-    const res = await fetch('/api/missions')
+    const apiUrl = import.meta.env.VITE_API_URL || '';
+    const res = await fetch(`${apiUrl}/api/missions`);
     if (!res.ok) {
       const text = await res.text()
       throw new Error(text || `Failed to fetch: ${res.status}`)
     }
     const data = await res.json()
-    
+
     const mapped = data.map((row: any) => ({
       id: row.id,
       title: row.title,
       status: row.status,
-      lastActivityAt: row.updated_at || row.created_at 
+      lastActivityAt: row.updated_at || row.created_at
     }))
 
     return { data: mapped, error: null }
   } catch (err) {
-    return { 
-      data: [], 
-      error: err instanceof Error ? err : new Error('Failed to load missions') 
+    return {
+      data: [],
+      error: err instanceof Error ? err : new Error('Failed to load missions')
     }
   }
 }
 
 export async function deleteSavedMission(id: string): Promise<{ error: Error | null }> {
   try {
-    const res = await fetch(`/api/missions/${id}`, { method: 'DELETE' })
+    const apiUrl = import.meta.env.VITE_API_URL || '';
+    const res = await fetch(`${apiUrl}/api/missions/${id}`, { method: 'DELETE' });
     if (!res.ok) {
       const text = await res.text()
       throw new Error(text || `Failed to delete: ${res.status}`)
@@ -66,13 +68,14 @@ export async function deleteSavedMission(id: string): Promise<{ error: Error | n
 
 export async function fetchMissionById(id: string): Promise<MissionDetail> {
   try {
-    const res = await fetch(`/api/missions/${id}`)
+    const apiUrl = import.meta.env.VITE_API_URL || '';
+    const res = await fetch(`${apiUrl}/api/missions/${id}`);
     if (!res.ok) {
       if (res.status === 404) return { ...emptyDetail, error: new Error('Mission not found') }
       const text = await res.text()
       throw new Error(text || `Failed to fetch: ${res.status}`)
     }
-    
+
     const data = await res.json()
     return { ...emptyDetail, ...data }
   } catch (err) {

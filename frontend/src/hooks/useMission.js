@@ -81,11 +81,11 @@ export function useMission(missionId) {
       })
     }
 
-    ;(async () => {
+    ; (async () => {
       try {
         setBootstrapping(true)
         setError('')
-        
+
         const detail = await fetchMissionById(missionId)
 
         if (gen !== loadGen.current) return
