@@ -3,8 +3,15 @@
   "name": "ai-mission-assistant-demo",
   "version": "0.1.0",
   "private": true,
-  "os": ["darwin", "linux", "win32"],
-  "cpu": ["x64", "arm64"],
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ],
   "description": "AI Mission Assistant demo — React (Vite) frontend, Express backend, Neon (Postgres).",
   "type": "module",
   "license": "UNLICENSED",
@@ -31,6 +38,11 @@
     "@types/node": "^25.7.0"
   },
   "dependencies": {
+    "@ai-sdk/google": "^4.0.8",
+    "@sentry/react": "^10.63.0",
+    "@sentry/vercel-edge": "^10.63.0",
+    "@sentry/vite-plugin": "^5.3.0",
+    "ai": "^7.0.15",
     "pg": "^8.22.0"
   },
   "optionalDependencies": {
