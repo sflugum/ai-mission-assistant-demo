@@ -35,7 +35,8 @@
     "migrate": "node scripts/migrate.js"
   },
   "devDependencies": {
-    "@types/node": "^25.7.0"
+    "@types/node": "^25.7.0",
+    "esbuild": "^0.28.1"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.8",
