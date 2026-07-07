@@ -21,9 +21,11 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "express-async-handler": "^1.2.0",
-    "pg": "^8.22.0"
+    "pg": "^8.22.0",
+    "pino": "^10.3.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.4"
+    "nodemon": "^3.1.4",
+    "pino-pretty": "^13.1.3"
   }
 }

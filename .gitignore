@@ -7,7 +7,6 @@ dist/
 .DS_Store
 
 .cursor/
-.trae/
 .vscode/
 
 
@@ -17,3 +16,5 @@ blob-report/
 
 
 
+.vercel
+.env*

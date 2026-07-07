@@ -3,7 +3,6 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
-import { sentryVitePlugin } from "@sentry/vite-plugin"
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -28,15 +27,8 @@ function readBackendPortConfigBaseUrl() {
 /** @param {unknown} mode */
 export default ({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
-
-  // process.env wins (Docker Compose `environment:`); loadEnv reads frontend/.env on disk.
-  const envProxyTarget = (
-    process.env.VITE_PROXY_TARGET ||
-    env.VITE_PROXY_TARGET ||
-    ''
-  ).trim()
-  const initialProxyTarget =
-    envProxyTarget || readBackendPortConfigBaseUrl() || 'http://localhost:3001'
+  const envProxyTarget = (process.env.VITE_PROXY_TARGET || env.VITE_PROXY_TARGET || '').trim()
+  const initialProxyTarget = envProxyTarget || readBackendPortConfigBaseUrl() || 'http://localhost:3001'
 
   /** Re-read port file each request so a backend port change does not require restarting Vite. */
   function resolveProxyTarget() {
@@ -58,28 +50,21 @@ export default ({ mode }) => {
     console.info(`[vite] API proxy → ${envProxyTarget} (VITE_PROXY_TARGET)`)
   }
 
-const apiProxy = {
+  const apiProxy = {
     target: initialProxyTarget,
     changeOrigin: true,
     router: () => resolveProxyTarget(),
-    bypass(req, res, options) {
-      const url = req.url || '';
-      // If it's a /missions route and the browser expects HTML (direct navigation/refresh)
-      if (url.startsWith('/api/missions') && req.headers.accept && req.headers.accept.includes('text/html')) {
-        return '/index.html'; // Serve index.html for client-side routing
+    bypass(req) {
+      if (req.headers.accept?.includes('text/html')) {
+        return '/index.html';
       }
-      // For /analyze or other /missions requests (e.g., fetch API calls expecting JSON), proxy them
       return null;
     }
   }
 
   return defineConfig({
     plugins: [
-      react(),
-      sentryVitePlugin({
-        org: "sflugum",
-        project: "ai-mission-assistant-demo"
-      })
+      react()
     ],
     resolve: {
       alias: {
@@ -91,16 +76,11 @@ const apiProxy = {
       port: 5173,
       strictPort: true,
       proxy: {
-        '/api/analyze': apiProxy,
-        '/api/missions': apiProxy
+        '/api': apiProxy
       }
     },
     build: {
       sourcemap: true,
-      minify: 'esbuild',
-      esbuild: {
-        pure: mode === 'production' ? ['console.log'] : []
-      }
     }
   })
 }

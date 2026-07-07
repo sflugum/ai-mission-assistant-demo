@@ -1,5 +1,4 @@
 import { Routes, Route } from 'react-router-dom'
-import { AnalyzeFlowProvider } from './context/AnalyzeFlowContext.jsx'
 import DemoDisclaimer from './components/DemoDisclaimer.jsx'
 import LandingPage from './components/LandingPage.jsx'
 import ResultsPage from './components/ResultsPage.jsx'
@@ -9,7 +8,7 @@ import MissionWorkspacePage from './components/MissionWorkspacePage.jsx'
 /** Top-level routes + shared analyze flow; bottom padding reserves space for the fixed legal strip. */
 export default function App() {
   return (
-    <AnalyzeFlowProvider>
+    <>
       {/* Skip link targets `#main-content` on each page shell (see LandingPage, ResultsPage, etc.). */}
       <a
         href="#main-content"
@@ -26,6 +25,6 @@ export default function App() {
         </Routes>
       </div>
       <DemoDisclaimer />
-    </AnalyzeFlowProvider>
+    </>
   )
 }

@@ -1,6 +1,6 @@
+import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import MissionInput from './MissionInput.jsx'
-import { useAnalyzeFlow } from '../context/AnalyzeFlowContext.jsx'
 import {
   heroBtnPrimaryClass,
   heroBtnSecondaryClass,
@@ -10,23 +10,16 @@ import {
 
 export default function LandingPage() {
   const navigate = useNavigate()
-  const {
-    input,
-    setInput,
-    loading,
-    error,
-    canSubmit,
-    submitAnalyze,
-    resetSession
-  } = useAnalyzeFlow()
+  const [input, setInput] = useState('')
 
-  async function onSubmit(e) {
-    const ok = await submitAnalyze(e)
-    if (ok) navigate('/results')
+  function onSubmit(e) {
+    e.preventDefault()
+    if (input.trim()) {
+      navigate('/results', { state: { initialPrompt: input } })
+    }
   }
 
   function onStartFreshMission() {
-    resetSession()
     navigate('/mission/new', { state: { focusWorkspace: true } })
   }
 
@@ -66,8 +59,7 @@ export default function LandingPage() {
                   Try a mission brief
                 </h2>
                 <p className="font-sans text-lg leading-relaxed text-slate-300 md:text-xl">
-                  Run analysis here and view structured results on the next
-                  screen—no repeat request.
+                  Enter your brief here and watch the AI build your structured plan live on the next screen.
                 </p>
               </div>
             </div>
@@ -76,9 +68,9 @@ export default function LandingPage() {
               input={input}
               onInputChange={setInput}
               onSubmit={onSubmit}
-              loading={loading}
-              error={error}
-              canSubmit={canSubmit}
+              loading={false}
+              error={""}
+              canSubmit={input.trim().length > 0}
             />
           </div>
         </div>

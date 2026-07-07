@@ -1,10 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
-import { analyzeMissionNormalized } from '../services/analyzeNormalized.js'
 import { fetchMissionById } from '../services/missions'
-
-let requestCounter = 0
-let latestRequestId = 0
+import { experimental_useObject as useObject } from '@ai-sdk/react'
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
@@ -27,19 +24,29 @@ function hasAnalysisRows(normalized) {
 export function useMission(missionId) {
   const location = useLocation()
   const [input, setInput] = useState('')
-  const [loading, setLoading] = useState(false)
   const [bootstrapping, setBootstrapping] = useState(() => !isNewMissionRoute(missionId))
-  const [error, setError] = useState('')
-  const [result, setResult] = useState({ actionPlan: [], risks: [], tools: [] })
+  const [fetchError, setFetchError] = useState('')
   const [showSaveOffer, setShowSaveOffer] = useState(false)
+  
+  // Holds data loaded from the Postgres database
+  const [savedResult, setSavedResult] = useState({ actionPlan: [], risks: [], tools: [] })
 
   const loadGen = useRef(0)
 
+  // 1. Initialize the AI SDK stream
+  const { submit, isLoading: aiLoading, object, error: aiError } = useObject({
+    api: '/api/generate-plan',
+    onFinish: ({ object }) => {
+      if (object && hasAnalysisRows(object)) {
+        setShowSaveOffer(true)
+      }
+    }
+  })
+
   const resetMissionState = useCallback(() => {
     setInput('')
-    setResult({ actionPlan: [], risks: [], tools: [] })
-    setError('')
-    setLoading(false)
+    setSavedResult({ actionPlan: [], risks: [], tools: [] })
+    setFetchError('')
     setShowSaveOffer(false)
   }, [])
 
@@ -60,47 +67,40 @@ export function useMission(missionId) {
 
     if (!isValidMissionUuid(missionId)) {
       resetMissionState()
-      setError('Invalid mission id')
+      setFetchError('Invalid mission id')
       setBootstrapping(false)
       return
     }
 
     const gen = ++loadGen.current
-
     const snapshot = location.state?.savedSnapshot
-    if (
-      snapshot &&
-      typeof snapshot === 'object' &&
-      typeof snapshot.description === 'string'
-    ) {
+
+    if (snapshot && typeof snapshot === 'object' && typeof snapshot.description === 'string') {
       setInput(snapshot.description)
-      setResult({
+      setSavedResult({
         actionPlan: snapshot.actionPlan ?? [],
         risks: snapshot.risks ?? [],
         tools: snapshot.tools ?? []
       })
     }
 
-    ; (async () => {
+    ;(async () => {
       try {
         setBootstrapping(true)
-        setError('')
+        setFetchError('')
 
         const detail = await fetchMissionById(missionId)
-
         if (gen !== loadGen.current) return
 
         if (detail.error) {
-          setError(detail.error.message)
-          setInput('')
-          setResult({ actionPlan: [], risks: [], tools: [] })
-          setShowSaveOffer(false)
+          setFetchError(detail.error.message)
+          resetMissionState()
           setBootstrapping(false)
           return
         }
 
         setInput(detail.description ?? '')
-        setResult({
+        setSavedResult({
           actionPlan: detail.actionPlan ?? [],
           risks: detail.risks ?? [],
           tools: detail.tools ?? []
@@ -109,47 +109,39 @@ export function useMission(missionId) {
         setBootstrapping(false)
       } catch (err) {
         if (gen !== loadGen.current) return
-        setError(err?.message || 'Failed to load mission')
-        setInput('')
-        setResult({ actionPlan: [], risks: [], tools: [] })
-        setShowSaveOffer(false)
+        setFetchError(err?.message || 'Failed to load mission')
+        resetMissionState()
         setBootstrapping(false)
       }
     })()
   }, [missionId, resetMissionState, location.state])
 
-  const canSubmit =
-    input.trim().length > 0 && !loading && !bootstrapping
+  // 2. Combine state for the UI
+  const loading = aiLoading || bootstrapping
+  const error = fetchError || aiError?.message || ''
+  
+  // If the AI is actively streaming (or finished), use `object`. 
+  // Otherwise, fall back to what was loaded from Postgres.
+  const activeData = (object && Object.keys(object).length > 0) ? object : savedResult
+
+  // 3. Ensure UI components always receive arrays, even during partial chunk parses
+  const result = {
+    actionPlan: activeData?.actionPlan || [],
+    risks: activeData?.risks || [],
+    tools: activeData?.tools || []
+  }
+
+  const canSubmit = input.trim().length > 0 && !loading && !bootstrapping
 
   async function onSubmit(e) {
     e.preventDefault()
     if (loading || bootstrapping) return
 
-    const requestId = ++requestCounter
-    latestRequestId = requestId
-
-    setError('')
-    setLoading(true)
-
-    try {
-      const normalized = await analyzeMissionNormalized(input)
-
-      if (requestId !== latestRequestId) {
-        return
-      }
-
-      setResult(normalized)
-      setShowSaveOffer(hasAnalysisRows(normalized))
-    } catch (err) {
-      if (requestId !== latestRequestId) {
-        return
-      }
-      setError(err?.message || 'Something went wrong.')
-    } finally {
-      if (requestId === latestRequestId) {
-        setLoading(false)
-      }
-    }
+    setFetchError('')
+    setShowSaveOffer(false)
+    
+    // 4. Trigger the edge function
+    submit({ prompt: input })
   }
 
   return {
