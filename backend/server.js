@@ -20,8 +20,15 @@ app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin) return callback(null, true)
-      
-        if (allowedOrigins.length === 0) {
+
+      if (
+        origin.endsWith('.vercel.app') &&
+        origin.includes('ai-mission-assistant-demo')
+      ) {
+        return callback(null, true)
+      }
+
+      if (allowedOrigins.length === 0) {
         if (isProduction) {
           return callback(
             new HttpError(
@@ -32,15 +39,8 @@ app.use(
         }
         return callback(null, true)
       }
-      
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true)
-      }
 
-      if (
-        origin.endsWith('.vercel.app') &&
-        origin.includes('ai-mission-assistant-demo')
-      ) {
+      if (allowedOrigins.includes(origin)) {
         return callback(null, true)
       }
 
