@@ -20,7 +20,8 @@ app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin) return callback(null, true)
-      if (allowedOrigins.length === 0) {
+      
+        if (allowedOrigins.length === 0) {
         if (isProduction) {
           return callback(
             new HttpError(
@@ -31,15 +32,25 @@ app.use(
         }
         return callback(null, true)
       }
+      
       if (allowedOrigins.includes(origin)) {
         return callback(null, true)
       }
+
+      if (
+        origin.endsWith('.vercel.app') &&
+        origin.includes('ai-mission-assistant-demo')
+      ) {
+        return callback(null, true)
+      }
+
       return callback(
         new HttpError(403, 'CORS Policy: This origin is not allowed.')
       )
     }
   })
 )
+
 app.use(express.json({ limit: '1mb' }))
 
 app.get('/health', (_req, res) => {
@@ -49,6 +60,7 @@ app.get('/health', (_req, res) => {
 app.use('/api', missionRoutes)
 
 app.use(notFoundHandler)
+
 app.use(errorHandler)
 
 function getInitialPort() {
