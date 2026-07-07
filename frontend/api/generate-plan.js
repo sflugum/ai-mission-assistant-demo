@@ -2,7 +2,9 @@ import { streamObject } from 'ai';
 import { google } from '@ai-sdk/google';
 import { z } from 'zod';
 
-export const runtime = 'edge'; 
+export const config = {
+  runtime: 'edge',
+};
 
 export default async function handler(req) {
   if (req.method !== 'POST') {
