@@ -1,5 +1,4 @@
 import { getNeonPool } from '../config/neon.js'
-import { generateAnalysisWithGemini } from '../services/geminiService.js'
 import { validateAIResponse } from '../utils/parser.js'
 import { HttpError } from '../middleware/errorMiddleware.js'
 import { resolveStoredTitle } from '../utils/missionTitle.js'
@@ -56,19 +55,6 @@ function parseSaveBody(body) {
     risks: body.risks,
     tools: body.tools
   }
-}
-
-export async function analyzeMission(req, res) {
-  const input = req?.body?.input
-  if (typeof input !== 'string' || input.trim().length === 0) {
-    throw new HttpError(400, 'input must be a non-empty string')
-  }
-
-  const trimmedInput = input.trim()
-  const analysis = await generateAnalysisWithGemini(trimmedInput)
-  validateAIResponse(analysis)
-
-  return res.json(analysis)
 }
 
 export async function createMission(req, res) {

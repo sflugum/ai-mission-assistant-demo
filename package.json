@@ -35,16 +35,11 @@
     "migrate": "node scripts/migrate.js"
   },
   "devDependencies": {
-    "@types/node": "^25.7.0",
-    "esbuild": "^0.28.1"
+    "@types/node": "^25.7.0"
   },
   "dependencies": {
-    "@ai-sdk/google": "^4.0.8",
-    "@sentry/react": "^10.63.0",
-    "@sentry/vercel-edge": "^10.63.0",
-    "@sentry/vite-plugin": "^5.3.0",
-    "ai": "^7.0.15",
-    "pg": "^8.22.0"
+    "pg": "^8.22.0",
+    "zod": "^4.4.3"
   },
   "optionalDependencies": {
     "lightningcss-linux-x64-gnu": "^1.29.0"

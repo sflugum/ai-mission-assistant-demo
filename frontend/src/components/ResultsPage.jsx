@@ -1,14 +1,23 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import Header from './Header.jsx'
 import RequirementDisplay from './RequirementDisplay.jsx'
 import SaveMissionModal from './SaveMissionModal.jsx'
-import { useAnalyzeFlow } from '../context/AnalyzeFlowContext.jsx'
+import { useMission } from '../hooks/useMission.js'
 
 export default function ResultsPage() {
   const navigate = useNavigate()
-  const { result, loading, input } = useAnalyzeFlow()
-  const [saveDismissed, setSaveDismissed] = useState(false)
+  const location = useLocation()
+  const { 
+    input, 
+    setInput, 
+    loading, 
+    result, 
+    onSubmit, 
+    showSaveOffer, 
+    dismissSaveOffer 
+  } = useMission('new')
+
   const [saveModalOpen, setSaveModalOpen] = useState(false)
 
   const hasRows =
@@ -17,8 +26,13 @@ export default function ResultsPage() {
     (result.tools?.length ?? 0) > 0
 
   useEffect(() => {
-    setSaveDismissed(false)
-  }, [result.actionPlan, result.risks, result.tools, input])
+    const prompt = location.state?.initialPrompt
+    if (prompt) {
+      setInput(prompt)
+      onSubmit({ preventDefault: () => {} })
+      navigate(location.pathname, { replace: true, state: {} })
+    }
+  }, [location.state, setInput, onSubmit, navigate])
 
   return (
     <div className="min-h-screen bg-black">
@@ -37,7 +51,7 @@ export default function ResultsPage() {
             </p>
           ) : null}
 
-          {!loading && hasRows && !saveDismissed ? (
+          {showSaveOffer ? (
             <div className="mb-10 flex flex-col gap-3 rounded-xl border border-slate-700 bg-[#151515] p-6 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
               <p className="font-sans text-sm leading-relaxed text-slate-300 sm:flex-1">
                 Save this analysis to your mission list, or continue without saving.
@@ -53,7 +67,7 @@ export default function ResultsPage() {
                 <button
                   type="button"
                   className="inline-flex min-h-[44px] items-center justify-center rounded-xl border-2 border-slate-500 px-5 py-2 font-heading text-sm font-semibold text-slate-200 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-                  onClick={() => setSaveDismissed(true)}
+                  onClick={dismissSaveOffer}
                 >
                   Not now
                 </button>
@@ -83,7 +97,7 @@ export default function ResultsPage() {
         result={result}
         routeMissionId={null}
         onSaveComplete={(id) => {
-          setSaveDismissed(true)
+          dismissSaveOffer()
           navigate(`/mission/${id}`, {
             state: {
               savedSnapshot: {

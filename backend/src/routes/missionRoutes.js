@@ -1,6 +1,5 @@
 import { Router } from 'express'
 import {
-  analyzeMission,
   createMission,
   replaceMission,
   getMissions,
@@ -14,9 +13,6 @@ const asyncHandler = (fn) => (req, res, next) => {
 }
 
 const router = Router()
-
-// AI Analysis
-router.post('/analyze', asyncHandler(analyzeMission))
 
 // Mission CRUD
 router.get('/missions', asyncHandler(getMissions))
