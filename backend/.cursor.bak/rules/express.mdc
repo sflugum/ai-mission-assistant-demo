@@ -1,7 +1,0 @@
----
-globs: ["backend/**/*.js", "backend/*.js"]
----
-
-
-Routes:
-- Inline route handlers

@@ -1,8 +1,0 @@
----
-globs: ["frontend/*.js", "frontend/**/*.js"]
----
-
-
-Structure:
-- One component per file 
-
