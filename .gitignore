@@ -6,14 +6,21 @@ frontend/.port_config.json
 dist/
 .DS_Store
 
+# IDEs
+.vscode/*
+
+.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+
 .cursor/
-.vscode/
+
 
 
 test-results/
 playwright-report/
 blob-report/
-
 
 
 .vercel
