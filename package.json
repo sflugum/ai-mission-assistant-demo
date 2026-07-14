@@ -35,7 +35,7 @@
     "migrate": "node scripts/migrate.js"
   },
   "devDependencies": {
-    "@types/node": "^25.7.0"
+    "@types/node": "^25.9.5"
   },
   "dependencies": {
     "pg": "^8.22.0",

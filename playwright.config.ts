@@ -1,7 +1,7 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { defineConfig } from '@playwright/test'
-import frontend from './frontend/playwright.config.ts'
+import frontend from './frontend/playwright.config'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const frontendDir = path.join(__dirname, 'frontend')

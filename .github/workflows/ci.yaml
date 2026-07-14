@@ -43,6 +43,7 @@ jobs:
           DATABASE_URL: ${{ steps.create_neon_branch.outputs.db_url_with_pooler }}
 
       - name: Run unit tests
+        working-directory: frontend
         run: npm run test:run
 
       - name: Install Playwright browsers
@@ -50,6 +51,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Run E2E tests
+        working-directory: frontend
         run: npm run test:e2e
         env:
           # Uses the ephemeral branch URL during PRs, falls back to a primary/staging DB for direct pushes
