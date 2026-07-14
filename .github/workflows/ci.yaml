@@ -27,35 +27,46 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Start Supabase local stack
-        if: false # TODO: Reenable once db migration is complete
-        run: npx supabase start
+      - name: Create Neon Branch (PR Only)
+        id: create_neon_branch
+        if: github.event_name == 'pull_request'
+        uses: neondatabase/create-branch-action@v6
+        with:
+          project_id: ${{ vars.NEON_PROJECT_ID }}
+          branch_name: ci/pr-${{ github.event.number }}-run-${{ github.run_id }}
+          api_key: ${{ secrets.NEON_API_KEY }}
 
-      - name: Run database tests and unit tests
-        if: false # TODO: Reenable once db migration is complete
+      - name: Run Database Migrations
+        if: github.event_name == 'pull_request'
+        run: npm run migrate
+        env:
+          DATABASE_URL: ${{ steps.create_neon_branch.outputs.db_url_with_pooler }}
+
+      - name: Run unit tests
         run: npm run test:run
 
       - name: Install Playwright browsers
-        if: false # TODO: Reenable once db migration is complete
         working-directory: frontend
         run: npx playwright install --with-deps chromium
 
       - name: Run E2E tests
-        if: false # TODO: Reenable once db migration is complete
         run: npm run test:e2e
         env:
-          VITE_SUPABASE_URL: https://nzbcsruutdgtwkugmktt.supabase.co
-          VITE_SUPABASE_ANON_KEY: sb_publishable_XnkWn46V8M-tBvcrd_cpUA_nvbvlvA6
+          # Uses the ephemeral branch URL during PRs, falls back to a primary/staging DB for direct pushes
+          DATABASE_URL: ${{ github.event_name == 'pull_request' && steps.create_neon_branch.outputs.db_url_with_pooler || secrets.DATABASE_URL }}
+          GOOGLE_GENERATIVE_AI_API_KEY: ${{ secrets.GOOGLE_GENERATIVE_AI_API_KEY }}
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
-      - name: Build frontend
-        if: false # TODO: Reenable once db migration is complete
-        run: npm run build
-        env:
-          VITE_SUPABASE_URL: https://nzbcsruutdgtwkugmktt.supabase.co
-          VITE_SUPABASE_ANON_KEY: sb_publishable_XnkWn46V8M-tBvcrd_cpUA_nvbvlvA6
+      - name: Delete Neon Branch
+        if: always() && github.event_name == 'pull_request'
+        uses: neondatabase/delete-branch-action@v3
+        with:
+          project_id: ${{ vars.NEON_PROJECT_ID }}
+          branch: ci/pr-${{ github.event.number }}-run-${{ github.run_id }}
+          api_key: ${{ secrets.NEON_API_KEY }}
 
       - name: Upload Playwright report
-        if: false # TODO: Reenable once db migration is complete
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
