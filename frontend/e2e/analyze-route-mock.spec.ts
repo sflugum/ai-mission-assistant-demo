@@ -1,12 +1,12 @@
 import { test, expect } from '@playwright/test'
 
-test.describe('/analyze mocking', () => {
+test.describe('/api/generate-plan mocking', () => {
   test('shows API error message when Analyze returns JSON 500', async ({
     page
   }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' })
 
-    await page.route('**/analyze', async (route) => {
+    await page.route('**/api/generate-plan', async (route) => {
       if (route.request().method() !== 'POST') {
         await route.continue()
         return
@@ -41,7 +41,7 @@ test.describe('/analyze mocking', () => {
   test('shows fallback error when Analyze returns opaque 500 body', async ({
     page
   }) => {
-    await page.route('**/analyze', async (route) => {
+    await page.route('**/api/generate-plan', async (route) => {
       if (route.request().method() !== 'POST') {
         await route.continue()
         return
