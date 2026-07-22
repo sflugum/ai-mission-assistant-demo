@@ -19,10 +19,7 @@ test.describe('/api/generate-plan mocking', () => {
       await route.fulfill({
         status: 500,
         contentType: 'application/json',
-        body: JSON.stringify({
-          message: 'Internal Server Error',
-          error: { message: 'Internal Server Error' }
-        })
+        body: JSON.stringify({error: "Failed to generate plan."})
       })
     })
 
