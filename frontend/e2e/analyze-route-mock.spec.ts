@@ -7,11 +7,7 @@ test.describe('/api/generate-plan mocking', () => {
     await page.emulateMedia({ reducedMotion: 'reduce' })
 
     await page.route('**/api/generate-plan*', async (route) => {
-
-      const req = route.request()
-      // TODO: Remove debug log
-      console.log('Intercepted:', req.method(), req.url())
-      if (req.method() !== 'POST') {
+      if (route.request().method() !== 'POST') {
         await route.continue()
         return
       }
@@ -19,7 +15,7 @@ test.describe('/api/generate-plan mocking', () => {
       await route.fulfill({
         status: 500,
         contentType: 'application/json',
-        body: JSON.stringify({error: "Failed to generate plan."})
+        body: JSON.stringify({ error: "Failed to generate plan." })
       })
     })
 
@@ -49,10 +45,7 @@ test.describe('/api/generate-plan mocking', () => {
     page
   }) => {
     await page.route('**/api/generate-plan*', async (route) => {
-      const req = route.request()
-      // TODO: Remove debug log
-      console.log('Intercepted:', req.method(), req.url())
-      if (req.method() !== 'POST') {
+      if (route.request().method() !== 'POST') {
         await route.continue()
         return
       }
