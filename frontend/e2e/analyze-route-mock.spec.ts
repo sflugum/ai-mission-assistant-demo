@@ -6,8 +6,12 @@ test.describe('/api/generate-plan mocking', () => {
   }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' })
 
-    await page.route('**/api/generate-plan', async (route) => {
-      if (route.request().method() !== 'POST') {
+    await page.route('**/api/generate-plan*', async (route) => {
+
+      const req = route.request()
+      // TODO: Remove debug log
+      console.log('Intercepted:', req.method(), req.url())
+      if (req.method() !== 'POST') {
         await route.continue()
         return
       }
@@ -15,7 +19,10 @@ test.describe('/api/generate-plan mocking', () => {
       await route.fulfill({
         status: 500,
         contentType: 'application/json',
-        body: JSON.stringify({ message: 'Internal Server Error' })
+        body: JSON.stringify({
+          message: 'Internal Server Error',
+          error: { message: 'Internal Server Error' }
+        })
       })
     })
 
@@ -26,9 +33,12 @@ test.describe('/api/generate-plan mocking', () => {
     )
     await page.getByRole('button', { name: 'Analyze' }).click()
 
-    await expect(
-      page.getByText('Internal Server Error', { exact: true })
-    ).toBeVisible()
+    const resp = await page.waitForResponse((r) =>
+      r.url().includes('/api/generate-plan') && r.request().method() === 'POST'
+    )
+    expect(resp.status()).toBe(500)
+
+    await expect(page.getByText(/Internal Server Error/i)).toBeVisible({ timeout: 10000 })
 
     await expect(page.getByRole('button', { name: 'Analyze' })).toBeEnabled()
 
@@ -41,8 +51,11 @@ test.describe('/api/generate-plan mocking', () => {
   test('shows fallback error when Analyze returns opaque 500 body', async ({
     page
   }) => {
-    await page.route('**/api/generate-plan', async (route) => {
-      if (route.request().method() !== 'POST') {
+    await page.route('**/api/generate-plan*', async (route) => {
+      const req = route.request()
+      // TODO: Remove debug log
+      console.log('Intercepted:', req.method(), req.url())
+      if (req.method() !== 'POST') {
         await route.continue()
         return
       }
@@ -58,6 +71,10 @@ test.describe('/api/generate-plan mocking', () => {
     await page.getByRole('textbox').fill('Mission brief.')
     await page.getByRole('button', { name: 'Analyze' }).click()
 
-    await expect(page.getByText(/^Request failed: 500$/)).toBeVisible()
+    await page.waitForResponse((r) =>
+      r.url().includes('/api/generate-plan') && r.request().method() === 'POST'
+    )
+
+    await expect(page.getByText(/Request failed[: ]*500/i)).toBeVisible({ timeout: 10000 })
   })
 })

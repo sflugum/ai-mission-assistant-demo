@@ -138,7 +138,6 @@ export async function replaceMission(req, res) {
 
     const lineRows = buildLineInsertRows(rawId, actionPlan, risks, tools)
     
-    // Efficiency Upgrade: Bulk Insert
     if (lineRows.length > 0) {
       const keys = Object.keys(lineRows[0])
       const values = []
@@ -237,8 +236,6 @@ export async function deleteMission(req, res) {
 
   const pool = getNeonPool()
   try {
-    // Efficiency Upgrade: Transaction removed. 
-    // ON DELETE CASCADE handles the mission_lines automatically.
     const delRes = await pool.query('DELETE FROM missions WHERE id = $1', [rawId])
     
     if (delRes.rowCount === 0) {
