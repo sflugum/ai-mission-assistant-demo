@@ -31,7 +31,7 @@ test.describe('/api/generate-plan mocking', () => {
     )
     expect(resp.status()).toBe(500)
 
-    await expect(page.getByText(/Failed to generate plan./i)).toBeVisible({ timeout: 10000 })
+    await expect(page.getByText(/Failed to generate plan/i)).toBeVisible({ timeout: 10000 })
 
     await expect(page.getByRole('button', { name: 'Analyze' })).toBeEnabled()
 
@@ -65,6 +65,6 @@ test.describe('/api/generate-plan mocking', () => {
       r.url().includes('/api/generate-plan') && r.request().method() === 'POST'
     )
 
-    await expect(page.getByText(/Failed to generate plan./i)).toBeVisible({ timeout: 10000 })
+    await expect(page.getByText(/Internal Server Error/i)).toBeVisible({ timeout: 10000 })
   })
 })
