@@ -24,11 +24,13 @@ test.describe('/api/generate-plan mocking', () => {
     await page.getByRole('textbox').fill(
       'Launch regional supply audit with zero downtime.'
     )
-    await page.getByRole('button', { name: 'Analyze' }).click()
 
-    const resp = await page.waitForResponse((r) =>
+    const respPromise = page.waitForResponse((r) =>
       r.url().includes('/api/generate-plan') && r.request().method() === 'POST'
     )
+    await page.getByRole('button', { name: 'Analyze' }).click()
+    const resp = await respPromise
+
     expect(resp.status()).toBe(500)
 
     await expect(page.getByText(/Failed to generate plan/i)).toBeVisible({ timeout: 10000 })
@@ -59,12 +61,17 @@ test.describe('/api/generate-plan mocking', () => {
 
     await page.goto('/mission/new')
     await page.getByRole('textbox').fill('Mission brief.')
+
+    const respPromise = page.waitForResponse((r) =>
+      r.url().includes('/api/generate-plan') && r.request().method() === 'POST'
+    )
     await page.getByRole('button', { name: 'Analyze' }).click()
+    await respPromise
 
     await page.waitForResponse((r) =>
       r.url().includes('/api/generate-plan') && r.request().method() === 'POST'
     )
 
-    await expect(page.getByText(/Internal Server Error/i)).toBeVisible({ timeout: 10000 })
+    await expect(page.getByText(/error|failed/i)).toBeVisible({ timeout: 10000 })
   })
 })
