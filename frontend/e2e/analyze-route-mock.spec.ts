@@ -68,6 +68,6 @@ test.describe('/api/generate-plan mocking', () => {
     await page.getByRole('button', { name: 'Analyze' }).click()
     await respPromise
 
-    await expect(page.getByText(/error|failed/i)).toBeVisible({ timeout: 10000 })
+    await expect(page.getByTestId('error-message')).toBeVisible({ timeout: 10000 })
   })
 })
