@@ -1,6 +1,6 @@
 # AI Mission Assistant
 
-![Docs Status](https://img.shields.io/badge/docs-up_to_date-brightgreen) ![Tests](https://img.shields.io/badge/tests-bypassed_pending_refactor-yellow) ![GitHub last commit](https://img.shields.io/github/last-commit/sflugum/ai-mission-assistant-demo/main)
+![Docs Status](https://img.shields.io/badge/docs-up_to_date-brightgreen) ![Tests](https://img.shields.io/badge/tests-passing-brightgreen) ![GitHub last commit](https://img.shields.io/github/last-commit/sflugum/ai-mission-assistant-demo/main)
 
 AI Mission Assistant transforms natural language ideas into structured project frameworks. Users describe a goal in plain language and receive a breakdown of action steps, potential risks, and recommended tools. Powered by the Gemini 2.5 Flash API and the Vercel AI SDK.
 
@@ -48,18 +48,20 @@ This project serves as a case study in my growth using AI as a development tool.
 
 ## 🧪 Testing
 
-> **⚠️ Status Note:** Due to the recent major architectural refactor (decoupling the API and migrating to Vercel Serverless functions), the automated test suite is currently outdated. Tests are temporarily bypassed in the GitHub Actions workflows (`.github/workflows/ci.yaml`) while they are being rewritten to reflect the new Edge runtime and API logic.
+The automated test suite is integrated directly into the GitHub Actions workflow (`.github/workflows/ci.yaml`) to ensure stability across the frontend, serverless API, and database layers.
 
-### Historical Test Suite (Pending Update)
+### Test Suite Overview
 
 **Database — pgTAP**
-* Asserts `public.missions` table exists.
+* Asserts schema integrity and verifies the `public.missions` table exists with correct configurations.
 
 **Unit / Integration — Vitest**
-* Asserts `aiService.analyzeMission` routing and error handling.
+* Asserts component logic, routing, and internal service error handling.
 
 **End-to-End — Playwright**
-* Asserts app loading, rendering, navigation, and visual regression baselines.
+* Asserts full user flows, app loading, rendering, and navigation.
+* Validates complex UI states and API mocking (e.g., verifying graceful fallback error handling for Edge runtime timeouts and opaque 500 responses).
+* Maintains visual regression baselines.
 
 ---
 
