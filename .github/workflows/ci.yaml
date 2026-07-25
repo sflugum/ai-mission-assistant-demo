@@ -39,7 +39,7 @@ jobs:
         if: github.event_name == 'pull_request'
         run: npm run migrate
         env:
-          DATABASE_URL: ${{ steps.create_neon_branch.outputs.db_url_with_pooler }}
+          DATABASE_URL: ${{ steps.create_neon_branch.outputs.db_url }}
 
       - name: Run unit tests
         working-directory: frontend
@@ -63,7 +63,7 @@ jobs:
           done
           npm run test:e2e
         env:
-          DATABASE_URL: ${{ github.event_name == 'pull_request' && steps.create_neon_branch.outputs.db_url_with_pooler || secrets.DATABASE_URL }}
+          DATABASE_URL: ${{ github.event_name == 'pull_request' && steps.create_neon_branch.outputs.db_url || secrets.DATABASE_URL }}
           GOOGLE_GENERATIVE_AI_API_KEY: ${{ secrets.GOOGLE_GENERATIVE_AI_API_KEY }}
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
