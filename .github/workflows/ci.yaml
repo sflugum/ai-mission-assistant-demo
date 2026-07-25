@@ -51,9 +51,18 @@ jobs:
 
       - name: Run E2E tests
         working-directory: frontend
-        run: npm run test:e2e
+        run: |
+          # Wait for API to be ready
+          for i in {1..30}; do
+            if curl -f "$VITE_API_URL/health" 2>/dev/null; then
+              echo "API is ready"
+              break
+            fi
+            echo "Waiting for API... attempt $i/30"
+            sleep 2
+          done
+          npm run test:e2e
         env:
-          # Uses the ephemeral branch URL during PRs, falls back to a primary/staging DB for direct pushes
           DATABASE_URL: ${{ github.event_name == 'pull_request' && steps.create_neon_branch.outputs.db_url_with_pooler || secrets.DATABASE_URL }}
           GOOGLE_GENERATIVE_AI_API_KEY: ${{ secrets.GOOGLE_GENERATIVE_AI_API_KEY }}
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
