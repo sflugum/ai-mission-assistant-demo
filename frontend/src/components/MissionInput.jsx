@@ -40,7 +40,9 @@ export default function MissionInput({
         </button>
 
         {error ? (
-          <p className="flex-1 rounded-xl border border-slate-600 shadow-[inset_3px_0_0_0_#YOUR_ACCENT_HEX] bg-[#141414] p-6 font-sans text-sm font-medium leading-relaxed text-highlight sm:mt-0 sm:max-w-xl antialiased">
+          <p 
+          data-testid="error-message"
+          className="flex-1 rounded-xl border border-slate-600 shadow-[inset_3px_0_0_0_#YOUR_ACCENT_HEX] bg-[#141414] p-6 font-sans text-sm font-medium leading-relaxed text-highlight sm:mt-0 sm:max-w-xl antialiased">
             {error}
           </p>
         ) : null}

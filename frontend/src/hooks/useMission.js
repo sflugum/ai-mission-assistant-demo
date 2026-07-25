@@ -118,7 +118,7 @@ export function useMission(missionId) {
 
   // 2. Combine state for the UI
   const loading = aiLoading || bootstrapping
-  const error = fetchError || aiError?.message || ''
+  const error = fetchError || (aiError ? (aiError.message || 'An unknown error occurred.') : '')
   
   // If the AI is actively streaming (or finished), use `object`. 
   // Otherwise, fall back to what was loaded from Postgres.
