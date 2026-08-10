@@ -14,6 +14,8 @@ export type MissionDetail = {
   error: Error | null
 }
 
+// Default shape for a failed/missing mission, so callers get null/[] instead
+// of undefined fields.
 const emptyDetail: MissionDetail = {
   description: null,
   title: null,
@@ -23,6 +25,11 @@ const emptyDetail: MissionDetail = {
   error: null
 }
 
+/**
+ * Fetches the list of saved missions for the current user.
+ * Returns a `{data, error}` pair instead of throwing, so callers can render
+ * an error state without wrapping every call site in try/catch.
+ */
 export async function fetchSavedMissions(): Promise<{
   data: SavedMissionRow[]
   error: Error | null
@@ -40,6 +47,9 @@ export async function fetchSavedMissions(): Promise<{
       id: row.id,
       title: row.title,
       status: row.status,
+      // updated_at defaults to NOW() at insert (same as created_at) and only
+      // changes via a trigger on an actual edit, so this rarely falls through
+      // to created_at, mainly a guard against a null/missing value.
       lastActivityAt: row.updated_at || row.created_at
     }))
 
@@ -52,6 +62,9 @@ export async function fetchSavedMissions(): Promise<{
   }
 }
 
+/**
+ * Deletes a saved mission by id.
+ */
 export async function deleteSavedMission(id: string): Promise<{ error: Error | null }> {
   try {
     const apiUrl = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
@@ -66,17 +79,23 @@ export async function deleteSavedMission(id: string): Promise<{ error: Error | n
   }
 }
 
+/**
+ * Fetches a single mission's details by id.
+ */
 export async function fetchMissionById(id: string): Promise<MissionDetail> {
   try {
     const apiUrl = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
     const res = await fetch(`${apiUrl}/api/missions/${id}`);
     if (!res.ok) {
+      // Handled separately so the caller can show "not found" instead of a
+      // generic fetch-failure message.
       if (res.status === 404) return { ...emptyDetail, error: new Error('Mission not found') }
       const text = await res.text()
       throw new Error(text || `Failed to fetch: ${res.status}`)
     }
 
     const data = await res.json()
+    // Spread over emptyDetail so a missing field comes back as null/[] instead of undefined.
     return { ...emptyDetail, ...data }
   } catch (err) {
     return { ...emptyDetail, error: err instanceof Error ? err : new Error('Failed to load mission') }

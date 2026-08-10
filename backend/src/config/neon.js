@@ -3,6 +3,8 @@ import { HttpError } from '../middleware/errorMiddleware.js'
 
 const { Pool } = pg
 
+// Module-level singleton so every import shares one connection pool instead
+// of each caller creating its own.
 let pool = null
 
 export function getNeonPool() {
@@ -25,6 +27,9 @@ export function getNeonPool() {
   })
 
   pool.on('error', (err) => {
+    // An idle client throwing usually means the pool is in a bad state.
+    // Exiting and letting the process manager restart it is safer than
+    // continuing to serve requests against a pool that might be broken.
     console.error('Unexpected error on idle database client', err)
     process.exit(-1)
   })

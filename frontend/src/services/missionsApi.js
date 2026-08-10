@@ -1,5 +1,13 @@
 import { MISSIONS_SAVE_URL, missionReplaceUrl } from '../api/config.js'
 
+/**
+ * Pulls a readable error message out of a failed response.
+ * Prefers the backend's own `message` field since it's usually more specific
+ * than a raw status code, and falls back to the raw response text if that's
+ * not available.
+ * @param {Response} res
+ * @returns {Promise<string>}
+ */
 async function readErrorMessage(res) {
   const text = await res.text().catch(() => '')
   if (!text) return `Request failed: ${res.status}`
@@ -10,6 +18,7 @@ async function readErrorMessage(res) {
     }
     return text
   } catch {
+    // Response wasn't JSON, just use the raw text as-is.
     return text
   }
 }
