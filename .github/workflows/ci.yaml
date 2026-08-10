@@ -34,6 +34,18 @@ jobs:
           project_id: ${{ vars.NEON_PROJECT_ID }}
           branch_name: ci/pr-${{ github.event.number }}-run-${{ github.run_id }}
           api_key: ${{ secrets.NEON_API_KEY }}
+          database: neondb
+          role: neondb_owner
+
+      - name: Verify URL Output
+        if: github.event_name == 'pull_request'
+        run: |
+          if [ -z "${{ steps.create_neon_branch.outputs.db_url }}"]; then
+            echo "FATAL: The connection string is empty at the GitHub Actions layer."
+            exit 1
+          else
+            echo "SUCCESS: The connection string was successfully received by GitHub Actions."
+            fi
 
       - name: Run Database Migrations
         if: github.event_name == 'pull_request'
