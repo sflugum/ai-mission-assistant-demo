@@ -8,6 +8,12 @@ import { getNeonPool } from '../backend/src/config/neon.js'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const migrationsDir = path.join(__dirname, '../backend/src/db/migrations')
 
+/**
+ * Runs any .sql files in the migrations folder that haven't been applied yet,
+ * tracking what's run in a migrations_history table. Each migration runs in
+ * its own transaction so a failure partway through a file rolls back cleanly
+ * instead of leaving that file half-applied.
+ */
 async function runMigrations() {
   const pool = getNeonPool()
   const client = await pool.connect()
@@ -24,6 +30,8 @@ async function runMigrations() {
     const { rows } = await client.query('SELECT name FROM migrations_history')
     const appliedMigrations = new Set(rows.map(r => r.name))
 
+    // Sorting by filename relies on migration files being named so alphabetical
+    // order matches run order (e.g. timestamp or numeric prefixes).
     const files = fs.readdirSync(migrationsDir)
       .filter(f => f.endsWith('.sql'))
       .sort() 
@@ -50,6 +58,8 @@ async function runMigrations() {
       console.log('✅ Database is already up to date.')
     }
   } catch (err) {
+    // This rollback only undoes the current migration's transaction.
+    // Migrations that already committed earlier in this run stay applied.
     await client.query('ROLLBACK')
     console.error('❌ Migration failed:', err)
   } finally {

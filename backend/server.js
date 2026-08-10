@@ -19,8 +19,13 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
 app.use(
   cors({
     origin: (origin, callback) => {
+      // No origin header usually means a non-browser request (curl, server-to-server),
+      // so it's let through rather than blocked by a check meant for browsers.
       if (!origin) return callback(null, true)
-
+      
+      // Vercel preview deployments get a different subdomain per branch/PR, so an
+      // exact-match allowlist would break on every new preview URL. Matching on the
+      // project name instead covers all of them without updating env vars each time.
       if (
         origin.endsWith('.vercel.app') &&
         origin.includes('ai-mission-assistant-demo')
@@ -37,6 +42,8 @@ app.use(
             )
           )
         }
+        // No allowlist configured in dev, permissive default so local frontend
+        // ports don't need to be listed out one by one.
         return callback(null, true)
       }
 
@@ -74,6 +81,10 @@ function getInitialPort() {
   return Math.trunc(n)
 }
 
+/** 
+ * Wraps app.listen in a promise so startServer can await it 
+ * and retry on a different port. 
+ * */
 function listenOnPort(expressApp, listenPort, listenHost) {
   return new Promise((resolve, reject) => {
     const server = listenHost
@@ -141,12 +152,17 @@ async function startServer() {
     } catch (err) {
       if (err.code === 'EADDRINUSE') {
         if (isProduction) {
+          // In production the port is usually set by the hosting platform (for
+          // health checks/port mapping), so silently binding elsewhere could
+          // break things in a way that's hard to notice so fail loudly instead.
           console.error(
             `[CRITICAL] Listen port ${initialPort} is already in use in production. ` +
             'Refusing to auto-increment. Fix PORT / the container port mapping or stop the conflicting process.'
           )
           process.exit(1)
         }
+        // Local dev convenience: try the next port instead of making you find
+        // and kill whatever's already using it.
         attemptPort += 1
         if (attemptPort > maxPort) {
           console.error('[EADDRINUSE] No free port found in development before reaching', maxPort)
