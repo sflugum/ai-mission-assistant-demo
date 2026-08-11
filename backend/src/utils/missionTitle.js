@@ -1,5 +1,10 @@
 export const TITLE_MAX_LENGTH = 80
 
+/**
+ * @param {string} input
+ * @returns {string} input unchanged if it fits, otherwise truncated with a
+ * trailing ellipsis so titles stay a predictable length in list views.
+ */
 export function buildTitle(input) {
   if (input.length <= TITLE_MAX_LENGTH) return input
   return `${input.slice(0, TITLE_MAX_LENGTH).trimEnd()}…`
