@@ -143,6 +143,10 @@ function MissionWorkspacePageInner({ missionId }) {
                 routeMissionId={routePersistId}
                 onSaveComplete={(id) => {
                   acknowledgeSaveComplete()
+                  // Navigate with the just-saved data attached so the mission
+                  // page can render it immediately instead of waiting on a
+                  // fetch back from Neon, see the savedSnapshot handling
+                  // in useMission.js.
                   navigate(`/mission/${id}`, {
                     state: {
                       savedSnapshot: {

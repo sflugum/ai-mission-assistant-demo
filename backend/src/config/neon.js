@@ -7,6 +7,9 @@ const { Pool } = pg
 // of each caller creating its own.
 let pool = null
 
+/**
+ * Lazily creates the Postgres pool on first use and reuses it after that.
+ */
 export function getNeonPool() {
   if (pool) return pool
 

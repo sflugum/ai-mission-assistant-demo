@@ -1,4 +1,9 @@
-/** Count non-empty trimmed lines across the three arrays (for validation before insert). */
+/**
+ * Count non-empty trimmed lines across the three arrays (for validation before insert).
+ * Reuses buildLineInsertRows with a throwaway mission id purely to get the
+ * row-shaping/trimming logic without duplicating it, the id itself is never
+ * persisted here.
+ */
 export function countPersistableLines(actionPlan, risks, tools) {
   return buildLineInsertRows(
     '00000000-0000-0000-0000-000000000001',
@@ -24,6 +29,8 @@ export function buildLineInsertRows(missionId, actionPlan, risks, tools) {
     for (const line of lines) {
       if (typeof line !== 'string') continue
       const t = line.trim()
+      // Blank/whitespace-only lines are dropped rather than stored.
+      // Keeps empty textarea rows from the UI out of the database.
       if (!t) continue
       rows.push({
         mission_id: missionId,

@@ -7,9 +7,15 @@ import {
   countPersistableLines
 } from '../utils/missionLines.js'
 
+// Standard UUID v1-v8 pattern (version + variant nibbles pinned), used to
+// reject malformed ids before they reach a query.
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
+ /**
+ * @param {string} name
+ * @param {unknown} value
+ */ 
 function assertStringArray(name, value) {
   if (!Array.isArray(value)) {
     throw new HttpError(400, `${name} must be an array`)
@@ -21,6 +27,12 @@ function assertStringArray(name, value) {
   }
 }
 
+/**
+ * Validates and normalizes the body for create/replace mission requests.
+ * Throws HttpError(400) on the first thing that's wrong rather than
+ * collecting every validation error. Fine for a single form, but a
+ * production API would probably want to report all field errors at once.
+ */
 function parseSaveBody(body) {
   const description = body?.description
   if (typeof description !== 'string' || description.trim().length === 0) {
@@ -77,6 +89,9 @@ export async function createMission(req, res) {
     const lineRows = buildLineInsertRows(missionId, actionPlan, risks, tools)
     
     if (lineRows.length > 0) {
+      // Building the multi-row INSERT by hand instead of pulling in a query
+      // builder. Fine at this scale, but this manual placeholder bookkeeping
+      // would get error-prone fast if the row shape grew more columns.
       const keys = Object.keys(lineRows[0])
       const values = []
       const placeholders = []
@@ -100,6 +115,8 @@ export async function createMission(req, res) {
     await client.query('COMMIT')
     return res.status(201).json({ missionId })
   } catch (err) {
+    // Roll back so a failed line insert doesn't leave an orphaned mission
+    // row with no lines attached to it.
     await client.query('ROLLBACK')
     if (err instanceof HttpError) throw err
     throw new HttpError(502, `Failed to create mission: ${err.message}`)
@@ -129,6 +146,9 @@ export async function replaceMission(req, res) {
       throw new HttpError(404, 'Mission not found')
     }
 
+    // Deletes all existing lines and re-inserts the new ones instead of
+    // comparing old vs new to update only what changed. Simpler to write,
+    // but means an update to one line rewrites every line for that mission.
     await client.query('DELETE FROM mission_lines WHERE mission_id = $1', [rawId])
 
     await client.query(
@@ -209,6 +229,9 @@ export async function getMissionById(req, res) {
     const risks = []
     const tools = []
 
+    // Lines come back as one flat, ordered list across all three categories,
+    // so this splits them back into separate arrays for the response shape
+    // the frontend expects.
     for (const row of linesRes.rows) {
       if (row.category === 'action_plan') actionPlan.push(row.line_text)
       else if (row.category === 'risk') risks.push(row.line_text)

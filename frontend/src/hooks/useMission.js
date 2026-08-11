@@ -3,9 +3,16 @@ import { useLocation } from 'react-router-dom'
 import { fetchMissionById } from '../services/missions'
 import { experimental_useObject as useObject } from '@ai-sdk/react'
 
+// Standard UUID v1-v8 pattern (version + variant nibbles pinned), used to
+// tell a real mission id apart from the "new" route param.
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
+/**
+ * @param {string | undefined} missionId
+ * @returns {boolean} true when the route is the "create new mission" state
+ * (no id yet, or the literal "new" segment) rather than an existing mission.
+ */  
 function isNewMissionRoute(missionId) {
   return !missionId || missionId === 'new'
 }
@@ -14,6 +21,12 @@ export function isValidMissionUuid(id) {
   return typeof id === 'string' && UUID_RE.test(id)
 }
 
+/**
+ * @param {{ actionPlan?: string[], risks?: string[], tools?: string[] } | undefined} normalized
+ * @returns {boolean} true if there's at least one row to show/save. Used to
+ * decide whether it's worth offering a save prompt after the AI finishes
+ * an empty or malformed response shouldn't trigger that.
+ */
 function hasAnalysisRows(normalized) {
   const a = normalized?.actionPlan?.length ?? 0
   const r = normalized?.risks?.length ?? 0
@@ -21,6 +34,10 @@ function hasAnalysisRows(normalized) {
   return a + r + t > 0
 }
 
+/**
+ * Loads an existing mission (by id) or sets up a blank "new mission" form,
+ * and wires up the streaming AI analysis call for that mission's input.
+ */
 export function useMission(missionId) {
   const location = useLocation()
   const [input, setInput] = useState('')
@@ -31,6 +48,9 @@ export function useMission(missionId) {
   // Holds data loaded from the Postgres database
   const [savedResult, setSavedResult] = useState({ actionPlan: [], risks: [], tools: [] })
 
+  // Bumped on every load attempt so an in-flight fetch that resolves after
+  // the user has already navigated away (or re-triggered a load) can tell
+  // its result is stale and skip updating state.
   const loadGen = useRef(0)
 
   // 1. Initialize the AI SDK stream
@@ -73,6 +93,10 @@ export function useMission(missionId) {
     }
 
     const gen = ++loadGen.current
+    // Populated by MissionWorkspacePage's onSaveComplete handler, which
+    // navigates here right after a save with the just-saved data attached.
+    // Lets this mission render immediately instead of waiting on the
+    // fetchMissionById round trip below.
     const snapshot = location.state?.savedSnapshot
 
     if (snapshot && typeof snapshot === 'object' && typeof snapshot.description === 'string') {
@@ -90,6 +114,8 @@ export function useMission(missionId) {
         setFetchError('')
 
         const detail = await fetchMissionById(missionId)
+        // Bail out if a newer load has started since this one kicked off.
+        // Otherwise a slow response could overwrite state set by a later request.
         if (gen !== loadGen.current) return
 
         if (detail.error) {
@@ -125,6 +151,8 @@ export function useMission(missionId) {
   const activeData = (object && Object.keys(object).length > 0) ? object : savedResult
 
   // 3. Ensure UI components always receive arrays, even during partial chunk parses
+  // (useObject can return a partially-parsed object mid-stream where a field
+  // is still undefined, so this keeps consumers from having to null-check).
   const result = {
     actionPlan: activeData?.actionPlan || [],
     risks: activeData?.risks || [],

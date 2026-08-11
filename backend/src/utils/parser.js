@@ -1,3 +1,9 @@
+/**
+ * @param {string} text
+ * @returns {string | null} the substring from the first `{` to the last `}`,
+ * or null if it can't find both. Handles cases where the model wraps its
+ * JSON in prose or a markdown code fence instead of returning raw JSON.
+ */
 function extractJsonObject(text) {
   if (typeof text !== 'string') return null
   const start = text.indexOf('{')
@@ -6,6 +12,12 @@ function extractJsonObject(text) {
   return text.slice(start, end + 1)
 }
 
+/**
+ * Checks the parsed AI response has exactly the three expected fields, each
+ * an array. Rejecting unknown keys (rather than just ignoring them) helps
+ * catch cases where the model drifted from the expected schema instead of
+ * silently passing malformed data downstream.
+ */
 export function validateAIResponse(data) {
   if (!data) throw new Error('Empty AI response')
 

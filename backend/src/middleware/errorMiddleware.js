@@ -16,6 +16,10 @@ export function notFoundHandler(req, _res, next) {
   next(new HttpError(404, `Cannot ${req.method} ${req.originalUrl}`))
 }
 
+/**
+ * Central Express error handler, maps thrown errors to an HTTP status and
+ * a response body, and hides stack traces / internal messages outside dev.
+ */
 export function errorHandler(err, _req, res, _next) {
   let status = typeof err?.statusCode === 'number' ? err.statusCode : 500
   let message = typeof err?.message === 'string' ? err.message : 'Internal Server Error'
@@ -30,6 +34,8 @@ export function errorHandler(err, _req, res, _next) {
     message = 'AI response failed validation after retry'
   }
 
+  // Postgres error codes (SQLSTATE) are always 5 characters, so this catches
+  // db-level failures that weren't already wrapped in an HttpError elsewhere.
   if (err?.code && typeof err.code === 'string' && err.code.length === 5) {
     status = 502 
     message = isDev ? `Database error (${err.code}): ${err.message}` : 'A database error occurred'
@@ -40,6 +46,8 @@ export function errorHandler(err, _req, res, _next) {
     console.error(err.stack)
   }
 
+  // Stack traces are only useful (and safe) to expose locally, leaking
+  // them in production could hand out internal file paths.
   const stack = isDev && typeof err?.stack === 'string' ? err.stack : ''
 
   res.status(status).json({
