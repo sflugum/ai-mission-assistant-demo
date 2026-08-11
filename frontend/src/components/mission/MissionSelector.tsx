@@ -18,6 +18,11 @@ const btnResumeCard =
 const btnDeleteCard =
   'inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border-2 border-secondary bg-white px-4 py-2 text-sm font-semibold text-secondary transition-colors hover:bg-secondary/10 active:bg-secondary/15 disabled:pointer-events-none disabled:opacity-50 outline-none focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-accent focus-visible:outline-offset-[3px]'
 
+/**
+ * Formats a saved mission's `lastActivityAt` timestamp for display.
+ * Falls back to an em dash instead of throwing if the value turns out to be
+ * missing or not a valid date instead of crashing the list.
+ */  
 function formatUpdatedAt(iso: string): string {
   try {
     const d = new Date(iso)
@@ -31,6 +36,8 @@ function formatUpdatedAt(iso: string): string {
   }
 }
 
+// Set by LandingPage/MissionWorkspacePage when navigated here with
+// router state, so this page knows to auto-scroll to the saved list.
 type MissionsLocationState = { focusSaved?: boolean }
 
 export default function MissionSelector() {
@@ -43,6 +50,9 @@ export default function MissionSelector() {
   const [deleteError, setDeleteError] = useState<string | null>(null)
 
   useEffect(() => {
+    // Tracks whether this effect instance is still the "current" one so a
+    // slow fetch can't overwrite state after the user has already navigated
+    // away or the route re-ran this effect.
     let cancelled = false
 
     ;(async () => {
@@ -64,6 +74,8 @@ export default function MissionSelector() {
     return () => {
       cancelled = true
     }
+    // Refetch whenever landing back on this route (pathname/key change),
+    // e.g. after saving a mission elsewhere and returning here.
   }, [location.pathname, location.key])
 
   useEffect(() => {
@@ -75,6 +87,8 @@ export default function MissionSelector() {
       block: 'start'
     })
 
+    // Clear the router state after acting on it so a refresh or back
+    // navigation doesn't re-trigger the scroll.
     navigate('.', { replace: true, state: {} })
   }, [location.state, navigate])
 
@@ -87,6 +101,7 @@ export default function MissionSelector() {
 
   async function handleDeleteMission(m: SavedMissionRow) {
     const rawTitle = (m.title ?? '').trim() || 'Untitled mission'
+    // Truncate long titles so the native confirm() dialog stays readable.
     const label = rawTitle.length > 72 ? `${rawTitle.slice(0, 72)}…` : rawTitle
     if (!window.confirm(`Delete "${label}"? This cannot be undone.`)) return
 
@@ -101,6 +116,8 @@ export default function MissionSelector() {
       return
     }
 
+    // Remove locally instead of refetching the whole list.
+    // Avoids an extra round trip since we already know the delete succeeded.
     setMissions((prev) => prev.filter((row) => row.id !== m.id))
   }
 

@@ -8,6 +8,8 @@ import { useMission } from '../hooks/useMission.js'
 export default function ResultsPage() {
   const navigate = useNavigate()
   const location = useLocation()
+  // 'new' tells useMission this page isn't tied to a saved mission id.
+  // It's always a fresh, unsaved analysis run.
   const { 
     input, 
     setInput, 
@@ -26,10 +28,17 @@ export default function ResultsPage() {
     (result.tools?.length ?? 0) > 0
 
   useEffect(() => {
+    // LandingPage's quick-analyze form sends the typed brief here via
+    // location.state instead of a query param. On arrival, the input is
+    // filled which immediately triggers Analyze so the user doesn't have to
+    // retype/resubmit. The synthetic event object stands in for a real
+    // form submit event since onSubmit only calls preventDefault on it.
     const prompt = location.state?.initialPrompt
     if (prompt) {
       setInput(prompt)
       onSubmit({ preventDefault: () => {} })
+      // Clear the state afterward so refreshing this page doesn't
+      // re-trigger the same Analyze call.
       navigate(location.pathname, { replace: true, state: {} })
     }
   }, [location.state, setInput, onSubmit, navigate])

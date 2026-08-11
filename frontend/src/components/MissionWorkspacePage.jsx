@@ -6,6 +6,11 @@ import RequirementDisplay from './RequirementDisplay.jsx'
 import SaveMissionModal from './SaveMissionModal.jsx'
 import { useMission, isValidMissionUuid } from '../hooks/useMission.js'
 
+/**
+ * True once at least one of the three result sections has content. Used to
+ * gate the "save this mission" offer so it doesn't show up before there's
+ * anything to save.
+ */
 function hasAnalysisRows(r) {
   const a = r?.actionPlan?.length ?? 0
   const b = r?.risks?.length ?? 0
@@ -17,6 +22,10 @@ function MissionWorkspacePageInner({ missionId }) {
   const location = useLocation()
   const navigate = useNavigate()
   const [saveModalOpen, setSaveModalOpen] = useState(false)
+  // Most of this page's state/behavior (loading an existing mission,
+  // running Analyze, the save-offer flow) lives in useMission. This
+  // component is mainly responsible for the layout and wiring, not the
+  // logic itself.
   const {
     input,
     setInput,
@@ -49,6 +58,8 @@ function MissionWorkspacePageInner({ missionId }) {
       block: 'start'
     })
 
+    // Clear the router state after acting on it so a refresh doesn't
+    // re-trigger the scroll.
     navigate('.', { replace: true, state: {} })
   }, [location.state, navigate])
 

@@ -7,6 +7,8 @@ const focusRingHero =
 export const heroBtnPrimaryClass =
   `inline-flex h-[44px] min-w-[44px] items-center justify-center rounded-xl bg-primary px-8 text-base font-semibold text-white -webkit-font-smoothing: antialiased transition-colors hover:bg-[#3d997c] active:bg-[#368f72] disabled:pointer-events-none disabled:opacity-60 ${focusRingHero}`
 
+// Secondary variant reuses the same sizing and focus-ring rules as primary,
+// just swaps to an outline style so it doesn't compete with the primary CTA.
 export const heroBtnSecondaryClass =
   `inline-flex h-[44px] min-w-[44px] items-center justify-center rounded-xl border-2 border-secondary bg-white px-8 text-base font-semibold text-secondary -webkit-font-smoothing: antialiased transition-colors hover:bg-secondary/10 active:bg-secondary/15 text-highlight ${focusRingHero}`
 
@@ -33,10 +35,17 @@ type MissionMarketingHeroProps = {
   actions: ReactNode
 }
 
+/**
+ * Shared hero layout for the landing page and the saved-missions page, so
+ * both entry points keep the same look without duplicating the markup.
+ */
 export function MissionMarketingHero({
   description,
   actions
 }: MissionMarketingHeroProps) {
+  // description can be a plain string or a custom node (e.g.
+  // MarketingHeroTagline). Strings get wrapped in the default paragraph
+  // styling here so callers don't have to repeat those classes every time.
   const descriptionEl =
     typeof description === 'string' ? (
       <p className="font-sans text-xl leading-relaxed text-slate-600">{description}</p>

@@ -74,11 +74,19 @@ export function useMission(missionId) {
     setShowSaveOffer(false)
   }, [])
 
+  // Same effect as dismissSaveOffer, but kept as its own function
+  // since it's called from a different place (right after a successful
+  // save, vs. the user clicking "Not now"). If the save-complete path
+  // ever needs extra handling later, it won't have to be untangled from
+  // the dismiss path.
   const acknowledgeSaveComplete = useCallback(() => {
     setShowSaveOffer(false)
   }, [])
 
   useEffect(() => {
+    // Three cases handled below: a brand-new/unsaved mission (reset and
+    // stop), an id that isn't even a valid UUID (show an error and stop),
+    // or a real id worth fetching from the database.
     if (isNewMissionRoute(missionId)) {
       resetMissionState()
       setBootstrapping(false)
