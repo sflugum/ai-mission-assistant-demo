@@ -9,6 +9,9 @@ test.describe('Landing page', () => {
       page.getByRole('heading', { level: 1, name: 'AI Mission Assistant' })
     ).toBeVisible()
     await page.getByRole('button', { name: 'Start new mission' }).click()
+    // Confirms the button navigates to a fresh (unsaved) mission route
+    // rather than checking page content, since that's the actual behavior
+    // being tested here.
     await expect(page).toHaveURL(/\/mission\/new$/)
   })
 })

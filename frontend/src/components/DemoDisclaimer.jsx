@@ -9,6 +9,8 @@ export default function DemoDisclaimer() {
       role="note"
       aria-label="Demonstration disclaimer"
     >
+       {/* max-h + overflow-y-auto so the disclaimer scrolls internally on
+          small screens instead of pushing page content around. */}
       <div className="mx-auto max-w-4xl max-h-[5.5rem] overflow-y-auto border-l-[3px] border-accent pl-3 sm:max-h-[6.5rem] sm:pl-4">
         <p className="font-heading text-xs font-bold uppercase tracking-wide text-highlight sm:text-sm">
           IMPORTANT: DEMONSTRATION ONLY

@@ -7,6 +7,7 @@ import { isValidMissionUuid } from '../hooks/useMission.js'
 
 const TITLE_PREVIEW_MAX = 80
 
+/** Shortened version of the mission description, shown as the title placeholder when the user leaves the title field blank. */
 function previewDefaultTitle(description) {
   const d = typeof description === 'string' ? description.trim() : ''
   if (!d) return 'Untitled mission'
@@ -14,6 +15,9 @@ function previewDefaultTitle(description) {
   return `${d.slice(0, TITLE_PREVIEW_MAX).trimEnd()}…`
 }
 
+// Selection state is a parallel array of booleans, one per line, matched to
+// each result array by index. Defaults everything to selected (true) since
+// most of the time the user wants to keep the whole analysis.
 function initialSelection(result) {
   return {
     actionPlan: (result?.actionPlan ?? []).map(() => true),
@@ -26,6 +30,20 @@ function filterBySelection(lines, selected) {
   return (lines ?? []).filter((_, i) => selected[i] === true)
 }
 
+/**
+ * Modal for saving (or overwriting) a mission's analysis. Lets the user
+ * pick a title and choose which individual lines from each section to
+ * keep, rather than forcing an all-or-nothing save.
+ *
+ * @param {{
+ *   open: boolean,
+ *   onClose: () => void,
+ *   description: string,
+ *   result: { actionPlan?: string[], risks?: string[], tools?: string[] },
+ *   routeMissionId: string | null,
+ *   onSaveComplete: (id: string) => void
+ * }} props
+ */
 export default function SaveMissionModal({
   open,
   onClose,
@@ -45,6 +63,9 @@ export default function SaveMissionModal({
     [description]
   )
 
+  // Reset all form state whenever the modal opens (or the underlying
+  // result changes) so reopening it doesn't carry over a stale selection
+  // or title from a previous save attempt.
   useEffect(() => {
     if (!open) return
     setTitle('')
@@ -54,6 +75,9 @@ export default function SaveMissionModal({
     setSaving(false)
   }, [open, result])
 
+  // "Replace" only makes sense when we're already viewing a real saved
+  // mission (i.e. the route has a valid mission id). ResultsPage always
+  // passes routeMissionId={null} since it's never tied to one.
   const canReplace = isValidMissionUuid(routeMissionId ?? '')
 
   function toggleLine(category, index) {
@@ -100,6 +124,9 @@ export default function SaveMissionModal({
     }
     const t = title.trim()
     if (t.length > 0) {
+      // Only send a title if the user actually typed one, letting the
+      // backend/DB default handle the blank case instead of sending the
+      // preview text as a real title.
       payload.title = t
     }
 
@@ -120,6 +147,12 @@ export default function SaveMissionModal({
 
   if (!open) return null
 
+   /**
+   * One collapsible section of checkboxes for a single result category
+   * (action plan / risks / tools). Defined inside the parent component so
+   * it can close over `result`, `selection`, `toggleLine`, and `setAll`
+   * without threading them through as props.
+   */
   function Section({ cat, label }) {
     const lines = result?.[cat] ?? []
     const sel = selection[cat] ?? []

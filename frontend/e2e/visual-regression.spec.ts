@@ -6,6 +6,8 @@ test.use({
 })
 
 test.beforeEach(async ({ page }) => {
+  // Reduced motion avoids capturing a screenshot mid-transition, which
+  // would otherwise make these snapshots flaky between runs.
   await page.emulateMedia({ reducedMotion: 'reduce' })
 })
 

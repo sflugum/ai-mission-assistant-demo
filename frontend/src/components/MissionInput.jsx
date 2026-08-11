@@ -1,6 +1,19 @@
 const btnAnalyzeBase =
   'h-[44px] min-w-[44px] rounded-xl bg-primary px-6 text-base font-semibold text-white antialiased transition-colors hover:bg-[#3d997c] active:bg-[#368f72] disabled:opacity-60 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent focus-visible:ring-offset-[3px] focus-visible:ring-offset-white'
 
+/**
+ * Textarea + Analyze button, shared between the landing page's quick-analyze
+ * form and the full mission workspace.
+ *
+ * @param {{
+ *   input: string,
+ *   onInputChange: (value: string) => void,
+ *   onSubmit: (e: React.FormEvent) => void,
+ *   loading: boolean,
+ *   error: string,
+ *   canSubmit: boolean
+ * }} props
+ */  
 export default function MissionInput({
   input,
   onInputChange,
@@ -42,7 +55,7 @@ export default function MissionInput({
         {error ? (
           <p 
           data-testid="error-message"
-          className="flex-1 rounded-xl border border-slate-600 shadow-[inset_3px_0_0_0_#YOUR_ACCENT_HEX] bg-[#141414] p-6 font-sans text-sm font-medium leading-relaxed text-highlight sm:mt-0 sm:max-w-xl antialiased">
+          className="flex-1 rounded-xl border border-slate-600 bg-[#141414] p-6 font-sans text-sm font-medium leading-relaxed text-highlight sm:mt-0 sm:max-w-xl antialiased">
             {error}
           </p>
         ) : null}

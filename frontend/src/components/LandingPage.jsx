@@ -15,6 +15,9 @@ export default function LandingPage() {
   function onSubmit(e) {
     e.preventDefault()
     if (input.trim()) {
+      // Hand the typed brief off to ResultsPage via router state rather
+      // than a query param. ResultsPage picks this up as `initialPrompt`
+      // and auto-runs Analyze on mount.
       navigate('/results', { state: { initialPrompt: input } })
     }
   }

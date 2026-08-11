@@ -1,5 +1,10 @@
 import { ErrorBoundary } from 'react-error-boundary'
 
+/**
+ * @param {{ resetErrorBoundary: () => void }} props - `resetErrorBoundary`
+ * is supplied by react-error-boundary; calling it clears the error state
+ * and re-renders the wrapped children instead of reloading the page.
+ */
 function Fallback({ resetErrorBoundary }) {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-950 px-4 text-center">
@@ -15,6 +20,13 @@ function Fallback({ resetErrorBoundary }) {
   )
 }
 
+/**
+ * Wraps the app in a top-level error boundary so a render error in one part
+ * of the tree shows a fallback screen instead of a blank white page. This
+ * only catches render-time errors in React components below it. It won't
+ * catch errors from event handlers or async code (e.g. fetch failures),
+ * those need their own try/catch or error state.
+ */
 export default function AppErrorBoundary({ children }) {
   return <ErrorBoundary FallbackComponent={Fallback}>{children}</ErrorBoundary>
 }

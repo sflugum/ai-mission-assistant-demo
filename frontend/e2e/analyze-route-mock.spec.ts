@@ -1,9 +1,14 @@
 import { test, expect } from '@playwright/test'
 
+// These tests use page.route to fake the /api/generate-plan response
+// instead of hitting the real backend, so error-state UI can be verified
+// without needing Docker/the local API running.
 test.describe('/api/generate-plan mocking', () => {
   test('shows API error message when Analyze returns JSON 500', async ({
     page
   }) => {
+    // Disabling animations keeps the full-page screenshot below stable
+    // between runs (no mid-transition frame differences).
     await page.emulateMedia({ reducedMotion: 'reduce' })
 
     await page.route('**/api/generate-plan*', async (route) => {
@@ -46,6 +51,9 @@ test.describe('/api/generate-plan mocking', () => {
   test('shows fallback error when Analyze returns opaque 500 body', async ({
     page
   }) => {
+    // Empty text/plain body, no JSON to parse. Covers the case where the
+    // backend (or a proxy in front of it) fails before it can return the
+    // app's normal error shape.
     await page.route('**/api/generate-plan*', async (route) => {
       if (route.request().method() !== 'POST') {
         await route.continue()

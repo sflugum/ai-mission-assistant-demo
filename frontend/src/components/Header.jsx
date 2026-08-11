@@ -3,6 +3,14 @@ import { Link } from 'react-router-dom'
 const linkBack =
   'mb-6 inline-flex min-h-[44px] min-w-[44px] items-center font-sans text-sm font-semibold text-primary underline decoration-accent decoration-2 underline-offset-4 transition-colors hover:text-slate-950 focus-visible:outline-none'
 
+/**
+ * Shared page header with the app title and an optional "back" link.
+ *
+ * @param {{ homeLink?: string, backLabel?: string }} props - `homeLink` is
+ * the route to link back to; when omitted (falsy) no back link is rendered
+ * at all, since not every page that uses this header has somewhere to go
+ * back to.
+ */
 export default function Header({ homeLink, backLabel = 'All missions' }) {
   return (
     <div className="space-y-6">
