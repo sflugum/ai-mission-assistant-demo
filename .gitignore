@@ -8,7 +8,6 @@ dist/
 
 # IDEs
 .vscode/*
-
 .vscode/settings.json
 !.vscode/extensions.json
 !.vscode/launch.json
@@ -16,12 +15,12 @@ dist/
 
 .cursor/
 
-
-
+# testing
 test-results/
 playwright-report/
 blob-report/
 
-
+# other
 .vercel
 .env*
+wip-diagram.mmd
